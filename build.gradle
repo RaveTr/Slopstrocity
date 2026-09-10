@@ -1,0 +1,128 @@
+plugins {
+    id("java-library")
+    id("maven-publish")
+    id("net.neoforged.moddev") version("${mdg_plugin_version}")
+    id("idea")
+}
+
+base {
+    archivesName = mod_id
+    version = mod_version
+    group = mod_group_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+neoForge {
+    version = neoforge_version
+
+    parchment {
+        mappingsVersion = parchment_mappings_version
+        minecraftVersion = parchment_minecraft_version
+    }
+
+    runs {
+        configureEach {
+            ideName = "${mod_name} Forge ${it.name.capitalize()}"
+            gameDirectory = file("run/${it.name}")
+            jvmArguments = ["-Xms4G", "-Xmx10G", "-XX:+UseG1GC", "-XX:+UnlockExperimentalVMOptions",
+                            "-XX:MaxGCPauseMillis=100", "-XX:+DisableExplicitGC", "-XX:TargetSurvivorRatio=90",
+                            "-XX:G1NewSizePercent=35", "-XX:G1MaxNewSizePercent=60",
+                            "-XX:G1MixedGCLiveThresholdPercent=50", "-XX:+AlwaysPreTouch", "-Dterminal.ansi=true",
+                            "-Dmixin.debug.export=true"]
+
+            systemProperty("forge.logging.console.level", "debug")
+            systemProperty("forge.logging.markers", "REGISTRIES")
+
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+
+        client {
+            client()
+        }
+
+        server {
+            server()
+        }
+
+        data {
+            data()
+
+            programArguments.addAll '--mod', "${mod_id}", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+configurations {
+    runtimeClasspath.extendsFrom(localRuntime)
+}
+
+repositories {
+}
+
+dependencies {
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    def props = new Properties()
+
+    file('gradle.properties').withInputStream { props.load(it) }
+
+    // Filter out any non-String values and system properties
+    def replaceProperties = [:]
+
+    props.each { key, value ->
+        if (value instanceof String) {
+            replaceProperties.put(key, value)
+        }
+    }
+
+    inputs.properties(replaceProperties)
+
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+sourceSets.main.resources {
+    srcDir('src/generated/resources')
+    exclude("src/generated/**/.cache")
+}
+
+sourceSets.main.resources.srcDir(generateModMetadata)
+neoForge.ideSyncTask(generateModMetadata)
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url "file://${projectDir}/repo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
