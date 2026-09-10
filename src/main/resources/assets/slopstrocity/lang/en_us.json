@@ -1,0 +1,22 @@
+{
+  "slopstrocity.networking.animation_play_payload.failed": "AnimationPlayPayload threw an exception while attempting to play an animation for a WrappedAnimatable (see the stacktrace below for more info)",
+  "slopstrocity.networking.animation_stop_payload.failed": "AnimationStopPayload threw an exception while attempting to stop an animation for a WrappedAnimatable (see the stacktrace below for more info)",
+  "slopstrocity.networking.screen_shake_payload.failed": "ScreenShakePayload threw an exception while attempting to enqueue screen shake effect on the client (see the stacktrace below for more info)",
+  "entity.slopstrocity.slopstrocity": "THE SLOPSTROCITY",
+  "subtitles.slopstrocity_idle_1": "Slopstrocity rings an alarm",
+  "subtitles.slopstrocity_idle_2": "Slopstrocity honks a horn",
+  "subtitles.slopstrocity_idle_3": "Slopstrocity caws",
+  "subtitles.slopstrocity_idle_4": "Slopstrocity dings",
+  "subtitles.slopstrocity_idle_5": "Slopstrocity bleeps",
+  "subtitles.slopstrocity_idle_6": "Slopstrocity dances",
+  "subtitles.slopstrocity_idle_7": "Slopstrocity creaks",
+  "subtitles.slopstrocity_idle_8": "Slopstrocity plays a ringtone",
+  "subtitles.slopstrocity_idle_9": "Slopstrocity sings",
+  "subtitles.slopstrocity_idle_10": "Slopstrocity yells",
+  "subtitles.slopstrocity_step": "Slopstrocity steps",
+  "subtitles.slopstrocity_hurt": "Slopstrocity hurts",
+  "subtitles.slopstrocity_splooge": "Slopstrocity splooges all over the place (dies, it died)",
+  "subtitles.slopstrocity_slop_slam_attack": "Slopstrocity slams",
+  "subtitles.slopstrocity_slop_spit_attack": "Slopstrocity spits",
+  "subtitles.slopstrocity_slop_stomp_attack": "Slopstrocity stomps"
+}

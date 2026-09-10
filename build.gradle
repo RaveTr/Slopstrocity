@@ -16,6 +16,13 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 neoForge {
     version = neoforge_version
 
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    if (at.exists()) {
+        accessTransformers = [at]
+        validateAccessTransformers = true
+    }
+
     parchment {
         mappingsVersion = parchment_mappings_version
         minecraftVersion = parchment_minecraft_version
@@ -23,7 +30,7 @@ neoForge {
 
     runs {
         configureEach {
-            ideName = "${mod_name} Forge ${it.name.capitalize()}"
+            ideName = "${mod_name} NeoForge ${it.name.capitalize()}"
             gameDirectory = file("run/${it.name}")
             jvmArguments = ["-Xms4G", "-Xmx10G", "-XX:+UseG1GC", "-XX:+UnlockExperimentalVMOptions",
                             "-XX:MaxGCPauseMillis=100", "-XX:+DisableExplicitGC", "-XX:TargetSurvivorRatio=90",
