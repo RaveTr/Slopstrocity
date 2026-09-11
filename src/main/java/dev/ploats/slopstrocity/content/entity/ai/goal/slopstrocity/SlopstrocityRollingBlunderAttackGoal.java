@@ -383,7 +383,7 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
         double knockbackMultiplier = -2.22D * 0.7D;
 
         Vec3 targetDelta = target.getDeltaMovement();
-        double baseVertical = targetDelta.lengthSqr() < 1.0e-4D ? 0.0D : targetDelta.normalize().y;
+        double baseVertical = targetDelta.lengthSqr() < EPSILON ? 0.0D : targetDelta.normalize().y;
         double upwardKick = (owner.getRandom().nextDouble() * 2.0D + 0.2D) * 0.7D;
 
         target.setDeltaMovement(knockbackMultiplier * Math.cos(targetAngle), baseVertical + upwardKick, knockbackMultiplier * Math.sin(targetAngle));
