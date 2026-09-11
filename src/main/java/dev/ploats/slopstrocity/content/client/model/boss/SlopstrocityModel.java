@@ -34,11 +34,9 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
     private final ModelPart finger1right;
     private final ModelPart finger2right;
     private final ModelPart finger3right;
-    private final ModelPart bone4;
     private final ModelPart armleft;
     private final ModelPart shoulderleft;
     private final ModelPart forearmleft;
-    private final ModelPart bone3;
     private final ModelPart finger1left;
     private final ModelPart finger3left;
     private final ModelPart finger2left;
@@ -48,7 +46,6 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
     private final ModelPart crotch;
     private final ModelPart legleft;
     private final ModelPart legright;
-    private final ModelPart bone2;
 
     public SlopstrocityModel(ModelPart root) {
         this.root = root.getChild("root");
@@ -77,13 +74,9 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
         this.finger2right = this.forearmright.getChild("finger2right");
         this.finger3right = this.forearmright.getChild("finger3right");
 
-        this.bone4 = this.forearmright.getChild("bone4");
-
         this.armleft = this.upperbody.getChild("armleft");
         this.shoulderleft = this.armleft.getChild("shoulderleft");
         this.forearmleft = this.shoulderleft.getChild("forearmleft");
-
-        this.bone3 = this.forearmleft.getChild("bone3");
 
         this.finger1left = this.forearmleft.getChild("finger1left");
         this.finger3left = this.forearmleft.getChild("finger3left");
@@ -97,8 +90,6 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
 
         this.legleft = this.bone.getChild("legleft");
         this.legright = this.bone.getChild("legright");
-
-        this.bone2 = this.root.getChild("bone2");
     }
 
     @Override
@@ -110,14 +101,17 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
         animate(owner.getDeathAnimState(), SlopstrocityAnimations.SLOP_CHEQUE, ageInTicks);
 
         // Attack
-        animate(owner.getSlopSlamAttackAnim(), SlopstrocityAnimations.SLAM, ageInTicks);
-        animate(owner.getSlopSpitAttackAnim(), SlopstrocityAnimations.SPIT, ageInTicks);
-        animate(owner.getSlopStompLeftAttackAnim(), SlopstrocityAnimations.STOMP_LEFT, ageInTicks);
-        animate(owner.getSlopStompRightAttackAnim(), SlopstrocityAnimations.STOMP_RIGHT, ageInTicks);
-        animate(owner.getRollingBlunderAttackAnim(), SlopstrocityAnimations.ROLL, ageInTicks);
+        animate(owner.getSlopSlamAttackAnimState(), SlopstrocityAnimations.SLAM, ageInTicks);
+        animate(owner.getSlopSpitAttackAnimState(), SlopstrocityAnimations.SPIT, ageInTicks);
+        animate(owner.getSlopStompLeftAttackAnimState(), SlopstrocityAnimations.STOMP_LEFT, ageInTicks);
+        animate(owner.getSlopStompRightAttackAnimState(), SlopstrocityAnimations.STOMP_RIGHT, ageInTicks);
+        animate(owner.getRollingBlunderAttackAnimState(), SlopstrocityAnimations.ROLL, ageInTicks);
+        animate(owner.getLeapChequeStartAttackAnimState(), SlopstrocityAnimations.LEAP_START, ageInTicks);
+        animate(owner.getLeapChequeLoopAttackAnimState(), SlopstrocityAnimations.LEAP_LOOP, ageInTicks);
+        animate(owner.getLeapChequeEndAttackAnimState(), SlopstrocityAnimations.LEAP_END, ageInTicks);
 
         // Walk Cycle
-        if (((owner.isMoving() && !owner.isFunctionallyAnimatingAttack()) || owner.hurtTime > 0) && owner.getAttackId() != Slopstrocity.ROLLING_BLUNDER_ATTACK_ID) animateWalk(SlopstrocityAnimations.WALK, limbSwing, limbSwingAmount, 1.75F, 1.0F);
+        if (((owner.isMoving() && !owner.isFunctionallyAnimatingAttack()) || owner.hurtTime > 0) && owner.getAttackId() != Slopstrocity.ROLLING_BLUNDER_ATTACK_ID) animateWalk(SlopstrocityAnimations.WALK, limbSwing, limbSwingAmount, 1.5F, 1.0F);
     }
 
     @Override
@@ -173,8 +167,6 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
         PartDefinition finger2right = forearmright.addOrReplaceChild("finger2right", CubeListBuilder.create().texOffs(308, 308).addBox(-1.5F, -0.5F, -2.5F, 3.0F, 11.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(-5.3333F, 41.8333F, 4.3333F));
         PartDefinition finger3right = forearmright.addOrReplaceChild("finger3right", CubeListBuilder.create().texOffs(312, 98).addBox(-1.5F, -0.5F, -2.5F, 3.0F, 11.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(7.6667F, 41.8333F, -0.6667F));
 
-        PartDefinition bone4 = forearmright.addOrReplaceChild("bone4", CubeListBuilder.create().texOffs(0, 275).addBox(0.0F, -25.0F, -1.5F, 0.0F, 34.0F, 47.0F, new CubeDeformation(0.0F)), PartPose.offset(3.1667F, 33.3333F, 14.3333F));
-
         PartDefinition armleft = upperbody.addOrReplaceChild("armleft", CubeListBuilder.create(), PartPose.offset(36.0F, -51.0F, 0.0F));
         PartDefinition shoulderleft = armleft.addOrReplaceChild("shoulderleft", CubeListBuilder.create().texOffs(130, 138).addBox(-0.3333F, 3.8333F, -13.5F, 38.0F, 23.0F, 27.0F, new CubeDeformation(0.0F))
                 .texOffs(94, 235).addBox(-0.3333F, -19.1667F, -13.5F, 20.0F, 23.0F, 27.0F, new CubeDeformation(0.0F))
@@ -182,8 +174,6 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
         PartDefinition forearmleft = shoulderleft.addOrReplaceChild("forearmleft", CubeListBuilder.create().texOffs(86, 285).mirror().addBox(-14.1667F, 1.3333F, -8.1667F, 22.0F, 21.0F, 16.0F, new CubeDeformation(0.0F)).mirror(false)
                 .texOffs(200, 87).addBox(-18.1667F, 22.3333F, -13.1667F, 29.0F, 20.0F, 27.0F, new CubeDeformation(0.0F))
                 .texOffs(304, 184).mirror().addBox(0.8333F, 1.3333F, -9.1667F, 9.0F, 13.0F, 18.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(20.8333F, 25.5F, -0.3333F));
-
-        PartDefinition bone3 = forearmleft.addOrReplaceChild("bone3", CubeListBuilder.create().texOffs(0, 275).addBox(0.0F, -26.0F, -1.5F, 0.0F, 34.0F, 47.0F, new CubeDeformation(0.0F)), PartPose.offset(-3.1667F, 34.3333F, 14.3333F));
 
         PartDefinition finger1left = forearmleft.addOrReplaceChild("finger1left", CubeListBuilder.create().texOffs(308, 292).addBox(-2.5F, -0.5F, -2.5F, 3.0F, 11.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(5.3333F, 41.8333F, 4.3333F));
         PartDefinition finger3left = forearmleft.addOrReplaceChild("finger3left", CubeListBuilder.create().texOffs(312, 82).addBox(-2.5F, -5.5F, -2.5F, 3.0F, 11.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(-7.6667F, 46.8333F, -0.6667F));
@@ -197,8 +187,6 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
 
         PartDefinition legleft = bone.addOrReplaceChild("legleft", CubeListBuilder.create().texOffs(0, 269).mirror().addBox(-11.0F, -0.5F, -10.5F, 22.0F, 29.0F, 21.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(20.0F, 26.5F, 0.5F));
         PartDefinition legright = bone.addOrReplaceChild("legright", CubeListBuilder.create().texOffs(0, 269).addBox(-11.0F, -0.5F, -10.5F, 22.0F, 29.0F, 21.0F, new CubeDeformation(0.0F)), PartPose.offset(-20.0F, 26.5F, 0.5F));
-
-        PartDefinition bone2 = root.addOrReplaceChild("bone2", CubeListBuilder.create().texOffs(0, 461).addBox(-25.0F, -1.0F, -25.0F, 50.0F, 1.0F, 50.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
 
         return LayerDefinition.create(meshDefinition, 512, 512);
     }

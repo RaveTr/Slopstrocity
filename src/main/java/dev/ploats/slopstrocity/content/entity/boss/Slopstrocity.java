@@ -3,6 +3,7 @@ package dev.ploats.slopstrocity.content.entity.boss;
 import dev.ploats.slopstrocity.api.vfx.ScreenShakeEffect;
 import dev.ploats.slopstrocity.content.entity.ai.goal.hostile.AnimatableAttackGoal;
 import dev.ploats.slopstrocity.content.entity.ai.goal.hostile.BandaidMoveToTargetGoal;
+import dev.ploats.slopstrocity.content.entity.ai.goal.slopstrocity.SlopstrocityRollingBlunderAttackGoal;
 import dev.ploats.slopstrocity.content.entity.base.AnimatableBoss;
 import dev.ploats.slopstrocity.content.registry.SlopstrocitySoundEvents;
 import dev.ploats.slopstrocity.util.MathUtil;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -47,16 +49,22 @@ public class Slopstrocity extends AnimatableBoss {
     public static final String SLOP_STOMP_LEFT_ATTACK_ANIM = "Slop Stomp Attack (Left)";
     public static final String SLOP_STOMP_RIGHT_ATTACK_ANIM = "Slop Stomp Attack (Right)";
     public static final String ROLLING_BLUNDER_ATTACK_ANIM = "Rolling Blunder Attack";
+    public static final String LEAP_CHEQUE_START_ATTACK_ANIM = "Leap Cheque Attack (Start)";
+    public static final String LEAP_CHEQUE_LOOP_ATTACK_ANIM = "Leap Cheque Attack (Loop)";
+    public static final String LEAP_CHEQUE_END_ATTACK_ANIM = "Leap Cheque Attack (End)";
     private static final List<DeferredHolder<SoundEvent, ? extends SoundEvent>> IDLE_SOUND_EVENTS = SlopstrocitySoundEvents.SOUND_EVENTS.getEntries().stream()
             .filter(soundEventDeferredHolder -> soundEventDeferredHolder.getRegisteredName().contains("slopstrocity_idle_"))
             .collect(Collectors.toCollection(ObjectArrayList::new));
     private final AnimationState idleAnimState = wrapState(IDLE_ANIM);
     private final AnimationState deathAnimState = wrapState(DEATH_ANIM);
-    private final AnimationState slopSlamAttackAnim = wrapState(SLOP_SLAM_ATTACK_ANIM);
-    private final AnimationState slopSpitAttackAnim = wrapState(SLOP_SPIT_ATTACK_ANIM);
-    private final AnimationState slopStompLeftAttackAnim = wrapState(SLOP_STOMP_LEFT_ATTACK_ANIM);
-    private final AnimationState slopStompRightAttackAnim = wrapState(SLOP_STOMP_RIGHT_ATTACK_ANIM);
-    private final AnimationState rollingBlunderAttackAnim = wrapState(ROLLING_BLUNDER_ATTACK_ANIM);
+    private final AnimationState slopSlamAttackAnimState = wrapState(SLOP_SLAM_ATTACK_ANIM);
+    private final AnimationState slopSpitAttackAnimState = wrapState(SLOP_SPIT_ATTACK_ANIM);
+    private final AnimationState slopStompLeftAttackAnimState = wrapState(SLOP_STOMP_LEFT_ATTACK_ANIM);
+    private final AnimationState slopStompRightAttackAnimState = wrapState(SLOP_STOMP_RIGHT_ATTACK_ANIM);
+    private final AnimationState rollingBlunderAttackAnimState = wrapState(ROLLING_BLUNDER_ATTACK_ANIM);
+    private final AnimationState leapChequeStartAttackAnimState = wrapState(LEAP_CHEQUE_START_ATTACK_ANIM);
+    private final AnimationState leapChequeLoopAttackAnimState = wrapState(LEAP_CHEQUE_LOOP_ATTACK_ANIM);
+    private final AnimationState leapChequeEndAttackAnimState = wrapState(LEAP_CHEQUE_END_ATTACK_ANIM);
     protected final ServerBossEvent bossEvent = new ServerBossEvent(Component.translatable("entity.slopstrocity.slopstrocity"), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.PROGRESS);
 
     public Slopstrocity(EntityType<? extends AnimatableBoss> entityType, Level level) {
@@ -100,7 +108,6 @@ public class Slopstrocity extends AnimatableBoss {
                     hurtTargets(animatable, target, potentialTargets);
                 })
                 .actionOnEnd((animatable, target, potentialTargets, curTick) -> animatable.playAnimation(IDLE_ANIM, true)));
-
         goalSelector.addGoal(0, new AnimatableAttackGoal<>(this, ObjectArrayList.of(SLOP_STOMP_LEFT_ATTACK_ANIM, SLOP_STOMP_RIGHT_ATTACK_ANIM), 58.4D, true, SLOP_STOMP_ATTACK_ID)
                 .attackArc(360.0D)
                 .potentialTargetRadius(12.0D)
@@ -120,9 +127,11 @@ public class Slopstrocity extends AnimatableBoss {
                     hurtTargets(animatable, target, potentialTargets);
                 })
                 .actionOnEnd((animatable, target, potentialTargets, curTick) -> animatable.playAnimation(IDLE_ANIM, true)));
+        goalSelector.addGoal(0, new SlopstrocityRollingBlunderAttackGoal(this, 1.2D));
 
         targetSelector.addGoal(0, new HurtByTargetGoal(this));
         targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
 
     private void hurtTargets(Slopstrocity animatable, @Nullable LivingEntity target, List<LivingEntity> potentialTargets) {
@@ -136,7 +145,7 @@ public class Slopstrocity extends AnimatableBoss {
     }
 
     private void hurtTargetAngularly(Slopstrocity animatable, @Nullable LivingEntity target) {
-        target.hurt(level().damageSources().mobAttack(animatable), Math.min(5.0F, 37.5F - animatable.distanceTo(target)));
+        target.hurt(level().damageSources().mobAttack(animatable), Math.max(5.0F, 37.5F - animatable.distanceTo(target)));
 
         double targetAngle = (MathUtil.getAngleBetweenEntities(animatable, target) + 90) * Math.PI / 180;
         double kbMultiplier = -2.22D;
@@ -186,7 +195,7 @@ public class Slopstrocity extends AnimatableBoss {
     protected void playStepSound(BlockPos pos, BlockState state) {
         super.playStepSound(pos, state);
 
-        playSound(SlopstrocitySoundEvents.SLOPSTROCITY_STEP.get(), 0.67F, Math.min(0.45F, random.nextFloat()));
+        if (!isAttacking()) playSound(SlopstrocitySoundEvents.SLOPSTROCITY_STEP.get(), 0.67F, Math.min(0.45F, random.nextFloat()));
     }
 
     @Override
@@ -252,23 +261,35 @@ public class Slopstrocity extends AnimatableBoss {
         return deathAnimState;
     }
 
-    public AnimationState getSlopSlamAttackAnim() {
-        return slopSlamAttackAnim;
+    public AnimationState getSlopSlamAttackAnimState() {
+        return slopSlamAttackAnimState;
     }
 
-    public AnimationState getSlopSpitAttackAnim() {
-        return slopSpitAttackAnim;
+    public AnimationState getSlopSpitAttackAnimState() {
+        return slopSpitAttackAnimState;
     }
 
-    public AnimationState getSlopStompLeftAttackAnim() {
-        return slopStompLeftAttackAnim;
+    public AnimationState getSlopStompLeftAttackAnimState() {
+        return slopStompLeftAttackAnimState;
     }
 
-    public AnimationState getSlopStompRightAttackAnim() {
-        return slopStompRightAttackAnim;
+    public AnimationState getSlopStompRightAttackAnimState() {
+        return slopStompRightAttackAnimState;
     }
 
-    public AnimationState getRollingBlunderAttackAnim() {
-        return rollingBlunderAttackAnim;
+    public AnimationState getRollingBlunderAttackAnimState() {
+        return rollingBlunderAttackAnimState;
+    }
+
+    public AnimationState getLeapChequeStartAttackAnimState() {
+        return leapChequeStartAttackAnimState;
+    }
+
+    public AnimationState getLeapChequeLoopAttackAnimState() {
+        return leapChequeLoopAttackAnimState;
+    }
+
+    public AnimationState getLeapChequeEndAttackAnimState() {
+        return leapChequeEndAttackAnimState;
     }
 }
