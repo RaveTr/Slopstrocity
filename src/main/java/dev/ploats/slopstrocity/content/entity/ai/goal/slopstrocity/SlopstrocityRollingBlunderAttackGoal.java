@@ -365,18 +365,17 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
     }
 
     private boolean isSolidAt(double x, double z, double feetY, int topBlockY) {
-        Level level = owner.level();
+        Level curLevel = owner.level();
 
-        this.solidProbePos.set(Mth.floor(x), Mth.floor(feetY), Mth.floor(z));
+        solidProbePos.set(Mth.floor(x), Mth.floor(feetY), Mth.floor(z));
 
         for (int blockY = Mth.floor(feetY); blockY <= topBlockY; blockY++) {
-            this.solidProbePos.setY(blockY);
+            solidProbePos.setY(blockY);
 
-            BlockState state = level.getBlockState(this.solidProbePos);
+            BlockState curProbedState = curLevel.getBlockState(solidProbePos);
 
-            if (state.isAir()) continue;
-
-            if (!state.getCollisionShape(level, this.solidProbePos).isEmpty() && (blockY + 1.0D) > feetY) return true;
+            if (curProbedState.isAir()) continue;
+            if (!curProbedState.getCollisionShape(curLevel, solidProbePos).isEmpty() && (blockY + 1.0D) > feetY) return true;
         }
         return false;
     }
