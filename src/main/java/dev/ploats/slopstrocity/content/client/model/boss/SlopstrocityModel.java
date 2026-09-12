@@ -6,6 +6,7 @@ import dev.ploats.slopstrocity.SlopstrocityMod;
 import dev.ploats.slopstrocity.content.client.animation.boss.SlopstrocityAnimations;
 import dev.ploats.slopstrocity.content.client.model.base.WrappedHierarchicalModel;
 import dev.ploats.slopstrocity.content.entity.boss.Slopstrocity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -96,22 +97,25 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
     public void setupAnim(Slopstrocity owner, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         super.setupAnim(owner, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
 
+        float curTickRateMultiplier = Minecraft.getInstance().level.tickRateManager().tickrate() / 20.0F;
+
         // Base
-        animate(owner.getIdleAnimState(), SlopstrocityAnimations.IDLE, ageInTicks);
-        animate(owner.getDeathAnimState(), SlopstrocityAnimations.SLOP_CHEQUE, ageInTicks);
+        animate(owner.getIdleAnimState(), SlopstrocityAnimations.IDLE, ageInTicks, curTickRateMultiplier);
+        animate(owner.getDeathAnimState(), SlopstrocityAnimations.SLOP_CHEQUE, ageInTicks, curTickRateMultiplier);
 
         // Attack
-        animate(owner.getSlopSlamAttackAnimState(), SlopstrocityAnimations.SLAM, ageInTicks);
-        animate(owner.getSlopSpitAttackAnimState(), SlopstrocityAnimations.SPIT, ageInTicks);
-        animate(owner.getSlopStompLeftAttackAnimState(), SlopstrocityAnimations.STOMP_LEFT, ageInTicks);
-        animate(owner.getSlopStompRightAttackAnimState(), SlopstrocityAnimations.STOMP_RIGHT, ageInTicks);
-        animate(owner.getRollingBlunderAttackAnimState(), SlopstrocityAnimations.ROLL, ageInTicks);
-        animate(owner.getLeapChequeStartAttackAnimState(), SlopstrocityAnimations.LEAP_START, ageInTicks);
-        animate(owner.getLeapChequeLoopAttackAnimState(), SlopstrocityAnimations.LEAP_LOOP, ageInTicks);
-        animate(owner.getLeapChequeEndAttackAnimState(), SlopstrocityAnimations.LEAP_END, ageInTicks);
+        animate(owner.getSlopSlamAttackAnimState(), SlopstrocityAnimations.SLAM, ageInTicks, curTickRateMultiplier);
+        animate(owner.getSlopSpitAttackAnimState(), SlopstrocityAnimations.SPIT, ageInTicks, curTickRateMultiplier);
+        animate(owner.getSlopStompLeftAttackAnimState(), SlopstrocityAnimations.STOMP_LEFT, ageInTicks, curTickRateMultiplier);
+        animate(owner.getSlopStompRightAttackAnimState(), SlopstrocityAnimations.STOMP_RIGHT, ageInTicks, curTickRateMultiplier);
+        animate(owner.getRollingBlunderAttackAnimState(), SlopstrocityAnimations.ROLL, ageInTicks, curTickRateMultiplier);
+        animate(owner.getLeapChequeStartAttackAnimState(), SlopstrocityAnimations.LEAP_START, ageInTicks, curTickRateMultiplier);
+        animate(owner.getLeapChequeLoopAttackAnimState(), SlopstrocityAnimations.LEAP_LOOP, ageInTicks, curTickRateMultiplier);
+        animate(owner.getLeapChequeEndAttackAnimState(), SlopstrocityAnimations.LEAP_END, ageInTicks, curTickRateMultiplier);
+        animate(owner.getSloppyCleanupAttackAnimState(), SlopstrocityAnimations.CLEANUP, ageInTicks, 1.3F * curTickRateMultiplier);
 
         // Walk Cycle
-        if (((owner.isMoving() && !owner.isFunctionallyAnimatingAttack()) || owner.hurtTime > 0) && owner.getAttackId() != Slopstrocity.ROLLING_BLUNDER_ATTACK_ID) animateWalk(SlopstrocityAnimations.WALK, limbSwing, limbSwingAmount, 1.5F, 1.0F);
+        if (((owner.isMoving() && !owner.isFunctionallyAnimatingAttack()) || owner.hurtTime > 0) && owner.getAttackId() != Slopstrocity.ROLLING_BLUNDER_ATTACK_ID) animateWalk(SlopstrocityAnimations.WALK, limbSwing, limbSwingAmount, 1.5F * curTickRateMultiplier, 1.0F);
     }
 
     @Override

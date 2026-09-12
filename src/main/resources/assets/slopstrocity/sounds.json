@@ -1,122 +1,152 @@
 {
   "slopstrocity_idle_1": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_idle_1",
     "sounds": [
       "slopstrocity:boss/slopstrocity/idle/goofy_ah_alarm"
     ]
   },
   "slopstrocity_idle_2": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_idle_2",
     "sounds": [
       "slopstrocity:boss/slopstrocity/idle/goofy_ahh_car_horn_but_it_gets_worse"
     ]
   },
   "slopstrocity_idle_3": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_idle_3",
     "sounds": [
       "slopstrocity:boss/slopstrocity/idle/goofy_ahh_don_pollo_sound"
     ]
   },
   "slopstrocity_idle_4": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_idle_4",
     "sounds": [
       "slopstrocity:boss/slopstrocity/idle/goofy_ahh_notification"
     ]
   },
   "slopstrocity_idle_5": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_idle_5",
     "sounds": [
       "slopstrocity:boss/slopstrocity/idle/goofy_don_polo"
     ]
   },
   "slopstrocity_idle_6": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_idle_6",
     "sounds": [
       "slopstrocity:boss/slopstrocity/idle/goofy_fortnite_sounds"
     ]
   },
   "slopstrocity_idle_7": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_idle_7",
     "sounds": [
       "slopstrocity:boss/slopstrocity/idle/metal_hinge_creaking"
     ]
   },
   "slopstrocity_idle_8": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_idle_8",
     "sounds": [
       "slopstrocity:boss/slopstrocity/idle/ohio_ringtone"
     ]
   },
   "slopstrocity_idle_9": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_idle_9",
     "sounds": [
       "slopstrocity:boss/slopstrocity/idle/wake_me_up_goofy"
     ]
   },
   "slopstrocity_idle_10": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_idle_10",
     "sounds": [
       "slopstrocity:boss/slopstrocity/idle/what_the_helllll"
     ]
   },
+
   "slopstrocity_step": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_step",
     "sounds": [
-      "slopstrocity:boss/slopstrocity/step/step"
+      {
+        "name": "slopstrocity:boss/slopstrocity/step/step",
+        "attenuation_distance": 24
+      }
     ]
   },
+
   "slopstrocity_hurt": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_hurt",
     "sounds": [
-      "slopstrocity:boss/slopstrocity/hurt/hurt_1",
-      "slopstrocity:boss/slopstrocity/hurt/hurt_2",
-      "slopstrocity:boss/slopstrocity/hurt/hurt_3",
-      "slopstrocity:boss/slopstrocity/hurt/hurt_4",
-      "slopstrocity:boss/slopstrocity/hurt/hurt_5",
-      "slopstrocity:boss/slopstrocity/hurt/hurt_6",
-      "slopstrocity:boss/slopstrocity/hurt/hurt_7",
-      "slopstrocity:boss/slopstrocity/hurt/hurt_8",
-      "slopstrocity:boss/slopstrocity/hurt/hurt_9"
+      {
+        "name": "slopstrocity:boss/slopstrocity/hurt/hurt_1",
+        "attenuation_distance": 28
+      },
+      {
+        "name": "slopstrocity:boss/slopstrocity/hurt/hurt_2",
+        "attenuation_distance": 28
+      },
+      {
+        "name": "slopstrocity:boss/slopstrocity/hurt/hurt_3",
+        "attenuation_distance": 28
+      },
+      {
+        "name": "slopstrocity:boss/slopstrocity/hurt/hurt_4",
+        "attenuation_distance": 28
+      },
+      {
+        "name": "slopstrocity:boss/slopstrocity/hurt/hurt_5",
+        "attenuation_distance": 28
+      },
+      {
+        "name": "slopstrocity:boss/slopstrocity/hurt/hurt_6",
+        "attenuation_distance": 28
+      },
+      {
+        "name": "slopstrocity:boss/slopstrocity/hurt/hurt_7",
+        "attenuation_distance": 28
+      },
+      {
+        "name": "slopstrocity:boss/slopstrocity/hurt/hurt_8",
+        "attenuation_distance": 28
+      },
+      {
+        "name": "slopstrocity:boss/slopstrocity/hurt/hurt_9",
+        "attenuation_distance": 28
+      }
     ]
   },
+
   "slopstrocity_splooge": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_splooge",
     "sounds": [
-      "slopstrocity:boss/slopstrocity/hurt/slopstrocity_splooge"
+      {
+        "name": "slopstrocity:boss/slopstrocity/hurt/slopstrocity_splooge",
+        "attenuation_distance": 36
+      }
     ]
   },
+
   "slopstrocity_slop_slam_attack": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_slop_slam_attack",
     "sounds": [
-      "slopstrocity:boss/slopstrocity/attack/slop_slam_attack"
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/slop_slam_attack",
+        "attenuation_distance": 34
+      }
     ]
   },
   "slopstrocity_slop_spit_attack": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_slop_spit_attack",
     "sounds": [
-      "slopstrocity:boss/slopstrocity/attack/slop_spit_attack"
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/slop_spit_attack",
+        "attenuation_distance": 30
+      }
     ]
   },
   "slopstrocity_slop_stomp_attack": {
-    "category": "entity",
     "subtitle": "subtitles.slopstrocity_slop_stomp_attack",
     "sounds": [
-      "slopstrocity:boss/slopstrocity/attack/slop_stomp_attack"
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/slop_stomp_attack",
+        "attenuation_distance": 32
+      }
     ]
   }
 }
