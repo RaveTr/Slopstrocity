@@ -9,6 +9,7 @@ import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +21,7 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
     private static final double ATTACK_END_TICK = 112.0D;
     private static final double RICOCHET_MAX_ARC_DEG = 70.0D;
     private static final double RICOCHET_TARGET_BIAS = 0.3D;
-    private static final int RICOCHET_COOLDOWN = 4;
+    private static final int RICOCHET_COOLDOWN = 2;
     private static final double PARABOLIC_TURN_TICKS = 22.0D;
     private static final double PARABOLIC_TURN_STEP = 0.28D; // Higher = tighter parabola btw
     private static final double MIN_PROGRESS = 0.05D; // Buffer range for horizontal collision, in case the actual flag in the entity itself isn't updated within the tick
@@ -41,6 +42,8 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
     private double ticksSinceImpact;
     private boolean turnActive;
     private int ricochetCooldown;
+    private int probeGate; // 0 = probe this tick, >0 = skip and decrement (wall probe runs every other tick)
+    private final BlockPos.MutableBlockPos solidProbePos = new BlockPos.MutableBlockPos();
 
     public SlopstrocityRollingBlunderAttackGoal(Slopstrocity owner, double rollSpeedMultiplier, double minInitiationRange, double maxInitiationRange, double cooldownTicks) {
         this.owner = owner;
@@ -86,6 +89,7 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
         this.ticksSinceImpact = 0.0D;
         this.turnActive = false;
         this.ricochetCooldown = 0;
+        this.probeGate = 0;
 
         owner.setAttackId(Slopstrocity.ROLLING_BLUNDER_ATTACK_ID);
 
@@ -138,29 +142,41 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
     private void tickRolling() {
         LivingEntity target = currentTarget();
 
-        double moved = Math.hypot(owner.getX() - prevX, owner.getZ() - prevZ);
-        boolean hit = owner.horizontalCollision || (pushedLastTick && moved < MIN_PROGRESS); // We're measuring out own displacement since apparently, an entity's xo and zo aren't necessarily reliable all the time in goal ticks based on testing
-        boolean wallAhead = rollDirection != null && isDirectionBlocked(rollDirection.x, rollDirection.z); // (Heavy voice) INCOMING!!!
-
         if (ricochetCooldown > 0) {
             ricochetCooldown--;
 
             rollStraight();
-        } else if (hit || wallAhead) {
-            ricochet(target);
-
-            this.ticksSinceImpact = 0.0D;
-            this.turnActive = false;
-            this.ricochetCooldown = RICOCHET_COOLDOWN;
-        } else if (turnActive) {
-            parabolicXZTurn(target);
         } else {
-            ticksSinceImpact++;
-            if (target != null && ticksSinceImpact > PARABOLIC_TURN_TICKS) {
-                this.turnActive = true;
+            double moved = Math.hypot(owner.getX() - prevX, owner.getZ() - prevZ);
+            boolean hit = owner.horizontalCollision || (pushedLastTick && moved < MIN_PROGRESS); // We're measuring our own displacement since apparently, an entity's xo and zo aren't necessarily reliable all the time in goal ticks based on testing
+            boolean wallAhead = false;
 
-                parabolicXZTurn(target); // We're turnin' dis car around
-            } else rollStraight();
+            if (!hit && rollDirection != null) {
+                if (probeGate <= 0) {
+                    wallAhead = isDirectionBlocked(rollDirection.x, rollDirection.z); // (Heavy voice) INCOMING!!!
+
+                    this.probeGate = 1;
+                } else probeGate--;
+            }
+
+            if (hit || wallAhead) {
+                ricochet(target);
+
+                this.ticksSinceImpact = 0.0D;
+                this.turnActive = false;
+                this.ricochetCooldown = RICOCHET_COOLDOWN;
+                this.probeGate = 0;
+            } else if (turnActive) {
+                parabolicXZTurn(target);
+            } else {
+                ticksSinceImpact++;
+
+                if (target != null && ticksSinceImpact > PARABOLIC_TURN_TICKS) {
+                    this.turnActive = true;
+
+                    parabolicXZTurn(target); // We're turnin' dis car around
+                } else rollStraight();
+            }
         }
 
         hitTargetsDuringRoll();
@@ -333,6 +349,8 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
         double cx = owner.getX() + nx * probe;
         double cz = owner.getZ() + nz * probe;
 
+        double feetY = owner.getY();
+        int topBlockY = Mth.ceil(owner.getBoundingBox().maxY);
         int samples = 5;
 
         for (int i = 0; i < samples; i++) { // We'll do sampling across multiple points on the leading edge, not just the center, that way we can properly detect imminent collisions at an angle
@@ -340,26 +358,25 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
             double px = cx + (-nz) * offset;
             double pz = cz + (nx) * offset;
 
-            if (isSolidAt(px, pz)) return true;
+            if (isSolidAt(px, pz, feetY, topBlockY)) return true;
         }
 
         return false;
     }
 
-    private boolean isSolidAt(double x, double z) {
+    private boolean isSolidAt(double x, double z, double feetY, int topBlockY) {
         Level level = owner.level();
 
-        int blockX = Mth.floor(x);
-        int blockZ = Mth.floor(z);
-
-        double feetY = owner.getY();
-
-        int topBlockY = Mth.ceil(owner.getBoundingBox().maxY);
+        this.solidProbePos.set(Mth.floor(x), Mth.floor(feetY), Mth.floor(z));
 
         for (int blockY = Mth.floor(feetY); blockY <= topBlockY; blockY++) {
-            BlockPos curPos = new BlockPos(blockX, blockY, blockZ);
+            this.solidProbePos.setY(blockY);
 
-            if (!level.getBlockState(curPos).getCollisionShape(level, curPos).isEmpty() && (blockY + 1.0D) > feetY) return true;
+            BlockState state = level.getBlockState(this.solidProbePos);
+
+            if (state.isAir()) continue;
+
+            if (!state.getCollisionShape(level, this.solidProbePos).isEmpty() && (blockY + 1.0D) > feetY) return true;
         }
         return false;
     }
@@ -367,9 +384,7 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
     private void hitTargetsDuringRoll() {
         AABB ownerBox = owner.getBoundingBox();
 
-        for (LivingEntity candidate : owner.level().getEntitiesOfClass(LivingEntity.class, ownerBox.inflate(0.5D))) {
-            if (candidate == owner || !isValidTarget(candidate) || !ownerBox.intersects(candidate.getBoundingBox())) continue;
-
+        for (LivingEntity candidate : owner.level().getEntitiesOfClass(LivingEntity.class, ownerBox, candidate -> candidate != owner && isValidTarget(candidate))) {
             knockbackTarget(candidate);
         }
     }
