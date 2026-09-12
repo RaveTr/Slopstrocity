@@ -115,7 +115,7 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
         animate(owner.getSloppyCleanupAttackAnimState(), SlopstrocityAnimations.CLEANUP, ageInTicks, 1.3F * curTickRateMultiplier);
 
         // Walk Cycle
-        if (((owner.isMoving() && !owner.isFunctionallyAnimatingAttack()) || owner.hurtTime > 0) && owner.getAttackId() != Slopstrocity.ROLLING_BLUNDER_ATTACK_ID) animateWalk(SlopstrocityAnimations.WALK, limbSwing, limbSwingAmount, 1.5F * curTickRateMultiplier, 1.0F);
+        if (((owner.isMoving() && !owner.isFunctionallyAnimatingAttack()) || owner.hurtTime > 0) && owner.getAttackId() != Slopstrocity.ROLLING_BLUNDER_ATTACK_ID && owner.getAttackId() != Slopstrocity.LEAP_CHEQUE_ATTACK_ID) animateWalk(SlopstrocityAnimations.WALK, limbSwing, limbSwingAmount, 1.5F * curTickRateMultiplier, 1.0F);
     }
 
     @Override
