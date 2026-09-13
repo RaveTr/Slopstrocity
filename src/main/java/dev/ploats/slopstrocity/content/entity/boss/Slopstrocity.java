@@ -65,7 +65,8 @@ public class Slopstrocity extends AnimatableBoss {
     public static final String LEAP_CHEQUE_START_ATTACK_ANIM = "Leap Cheque Attack (Start)";
     public static final String LEAP_CHEQUE_LOOP_ATTACK_ANIM = "Leap Cheque Attack (Loop)";
     public static final String LEAP_CHEQUE_END_ATTACK_ANIM = "Leap Cheque Attack (End)";
-    public static final String SLOPPY_CLEANUP_ATTACK_ANIM = "Sloppy Cleanup Attack";
+    public static final String SLOPPY_CLEANUP_LEFT_ATTACK_ANIM = "Sloppy Cleanup Attack (Left)";
+    public static final String SLOPPY_CLEANUP_RIGHT_ATTACK_ANIM = "Sloppy Cleanup Attack (Right)";
     private static final List<DeferredHolder<SoundEvent, ? extends SoundEvent>> IDLE_SOUND_EVENTS = SlopstrocitySoundEvents.SOUND_EVENTS.getEntries().stream()
             .filter(soundEventDeferredHolder -> soundEventDeferredHolder.getRegisteredName().contains("slopstrocity_idle_"))
             .collect(Collectors.toCollection(ObjectArrayList::new));
@@ -79,7 +80,8 @@ public class Slopstrocity extends AnimatableBoss {
     private final AnimationState leapChequeStartAttackAnimState = wrapState(LEAP_CHEQUE_START_ATTACK_ANIM);
     private final AnimationState leapChequeLoopAttackAnimState = wrapState(LEAP_CHEQUE_LOOP_ATTACK_ANIM);
     private final AnimationState leapChequeEndAttackAnimState = wrapState(LEAP_CHEQUE_END_ATTACK_ANIM);
-    private final AnimationState sloppyCleanupAttackAnimState = wrapState(SLOPPY_CLEANUP_ATTACK_ANIM);
+    private final AnimationState sloppyCleanupLeftAttackAnimState = wrapState(SLOPPY_CLEANUP_LEFT_ATTACK_ANIM);
+    private final AnimationState sloppyCleanupRightAttackAnimState = wrapState(SLOPPY_CLEANUP_RIGHT_ATTACK_ANIM);
     private final ServerBossEvent bossEvent = new ServerBossEvent(Component.translatable("entity.slopstrocity.slopstrocity"), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.PROGRESS);
     private double aeOffset = 1.0D;
     private double maxAEOffset = 1.0D;
@@ -163,10 +165,10 @@ public class Slopstrocity extends AnimatableBoss {
         goalSelector.addGoal(0, new SlopstrocityRollingBlunderAttackGoal(this, 1.45D));
         goalSelector.addGoal(0, new SlopstrocityLeapChequeAttackGoal(this));
 
-        goalSelector.addGoal(0, new AnimatableAttackGoal<>(this, ObjectArrayList.of(SLOPPY_CLEANUP_ATTACK_ANIM), 30.15D, true, SLOPPY_CLEANUP_ATTACK_ID)
+        goalSelector.addGoal(0, new AnimatableAttackGoal<>(this, ObjectArrayList.of(SLOPPY_CLEANUP_LEFT_ATTACK_ANIM, SLOPPY_CLEANUP_RIGHT_ATTACK_ANIM), 39.2D, true, SLOPPY_CLEANUP_ATTACK_ID)
                 .attackArc(100.0D)
                 .potentialTargetRadius(6.0D)
-                .attackFrame(16.6D, 17.0D)
+                .attackFrame(17.6D, 18.0D)
                 .attackTickCooldown(4.0D)
                 .initiationRange(9.0D)
                 .performDefaultAttack(false)
@@ -175,9 +177,9 @@ public class Slopstrocity extends AnimatableBoss {
                     animatable.stopAnimation(IDLE_ANIM);
                 })
                 .actionOnAttack((animatable, target, potentialTargets, curTick) -> {
-                    new ScreenShakeEffect(animatable.blockPosition(), 67.9D, 0.0148F, 40.5F, 1.0F).enqueue(animatable.level());
+                    new ScreenShakeEffect(animatable.blockPosition(), 67.9D, 0.0151F, 44.5F, 1.112F).enqueue(animatable.level());
 
-                    initializeQuake(3.0D, 14.0D, () -> causeAestheticEarthquake(aeOffset, (float) Math.min(180.0D, aeOffset * 13.0D), 1.0D + (aeOffset * 0.15D)));
+                    initializeQuake(4.0D, 16.0D, () -> causeAestheticEarthquake(aeOffset, (float) Math.min(180.0D, aeOffset * 13.0D), 1.0D + (aeOffset * 0.15D)));
 
                     hurtTargets(animatable, target, potentialTargets);
                 })
@@ -336,8 +338,12 @@ public class Slopstrocity extends AnimatableBoss {
         return leapChequeEndAttackAnimState;
     }
 
-    public AnimationState getSloppyCleanupAttackAnimState() {
-        return sloppyCleanupAttackAnimState;
+    public AnimationState getSloppyCleanupLeftAttackAnimState() {
+        return sloppyCleanupLeftAttackAnimState;
+    }
+
+    public AnimationState getSloppyCleanupRightAttackAnimState() {
+        return sloppyCleanupRightAttackAnimState;
     }
 
     public double getCurrentAnimatedBlockOffset() {
