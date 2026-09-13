@@ -212,7 +212,7 @@ public class SlopstrocityLeapChequeAttackGoal extends Goal {
 
         new ScreenShakeEffect(owner.blockPosition(), 70.5D, 0.0046F, 87.12F, 1.4F).enqueue(owner.level());
 
-        owner.initializeQuake(3.0D, 10.0D, () -> owner.causeAestheticEarthquake(owner.getCurrentAnimatedBlockOffset(), 360.0F, 1.0D + (owner.getCurrentAnimatedBlockOffset() * 0.2D)), (double) owner.getYRot(), owner.blockPosition(), owner.getBoundingBox());
+        owner.initializeQuake(3.0D, 15.0D, () -> owner.causeAestheticEarthquake(owner.getCurrentAnimatedBlockOffset(), 360.0F, 1.0D + (owner.getCurrentAnimatedBlockOffset() * 0.2D)), (double) owner.getYRot(), owner.blockPosition(), owner.getBoundingBox());
         owner.hurtTargets(owner, owner.getTarget(), EntityUtil.getAllEntitiesAround(owner, 6.0D, 6.0D, 6.0D, 5.55D).stream().filter(entity -> !owner.isAlliedTo(entity) && !entity.isAlliedTo(owner) && owner.getClass() != entity.getClass() && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity)).toList());
     }
 

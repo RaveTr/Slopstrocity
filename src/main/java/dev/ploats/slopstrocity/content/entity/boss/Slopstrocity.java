@@ -185,6 +185,23 @@ public class Slopstrocity extends AnimatableBoss {
                 })
                 .actionOnEnd((animatable, target, potentialTargets, curTick) -> animatable.playAnimation(IDLE_ANIM, true)));
 
+        goalSelector.addGoal(0, new AnimatableAttackGoal<>(this, ObjectArrayList.of(SLOP_SPIT_ATTACK_ANIM), 40.0D, true, SLOP_SPIT_ATTACK_ID)
+                .attackArc(100.0D)
+                .potentialTargetRadius(6.0D)
+                .attackFrame(17.6D, 18.0D)
+                .attackTickCooldown(80.0D)
+                .initiationRange(16.0D)
+                .additionalStartConditions((animatable) -> animatable.random.nextDouble() >= 0.92D || (animatable.getTarget() != null && animatable.getTarget().distanceTo(animatable) >= 14.0D && random.nextDouble() >= 0.35D))
+                .actionOnStart((animatable, target, potentialTargets, curTick) -> {
+                    animatable.stopAnimation(IDLE_ANIM);
+                })
+                .actionOnAttack((animatable, target, potentialTargets, curTick) -> {
+                    new ScreenShakeEffect(animatable.blockPosition(), 50.9D, 0.01754F, 40.5F, 1.121F).enqueue(animatable.level());
+
+                    playSound(SlopstrocitySoundEvents.SLOPSTROCITY_SLOP_SPIT_ATTACK.get());
+                })
+                .actionOnEnd((animatable, target, potentialTargets, curTick) -> animatable.playAnimation(IDLE_ANIM, true)));
+
         targetSelector.addGoal(0, new HurtByTargetGoal(this));
         targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, true));
         targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
