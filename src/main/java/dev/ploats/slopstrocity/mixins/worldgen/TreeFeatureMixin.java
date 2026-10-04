@@ -33,10 +33,12 @@ public abstract class TreeFeatureMixin { // Mark my words, I'm redesigning Minec
     @Inject(method = "place", at = @At("HEAD"), cancellable = true)
     private void slopstrocity$fuhOffTrees(FeaturePlaceContext<TreeConfiguration> context, CallbackInfoReturnable<Boolean> cir) {
         ServerLevel curServerLevel = context.level().getLevel();
+        StructureManager structureManager = curServerLevel.structureManager();
+        BlockPos startOriginPos = context.origin();
+
+        if (!structureManager.hasAnyStructureAt(startOriginPos)) return;
 
         curServerLevel.registryAccess().lookup(Registries.STRUCTURE).flatMap(lookup -> lookup.get(slopstrocity$KEY)).ifPresent(structRef -> {
-            StructureManager structureManager = curServerLevel.structureManager();
-            BlockPos startOriginPos = context.origin();
             StructureStart sloppingArenaStart = structureManager.getStructureAt(startOriginPos, structRef.getDelegate().value());
 
             if (sloppingArenaStart == StructureStart.INVALID_START) return;

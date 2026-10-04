@@ -345,6 +345,8 @@ public class Slopstrocity extends AnimatableBoss {
     public void onRemovedFromLevel() {
         super.onRemovedFromLevel();
 
+        if (getRemovalReason() == RemovalReason.UNLOADED_TO_CHUNK || getRemovalReason() == RemovalReason.UNLOADED_WITH_PLAYER) return; // Against KILLED alone fails to spawn the particles and I'm too lazy to debug ts atm
+
         new ScreenShakeEffect(blockPosition(), 67.98D, 0.00748F, 129.5F, 1.345F).enqueue(level());
 
         for (int i = 0; i < 10; i++) {
@@ -361,15 +363,22 @@ public class Slopstrocity extends AnimatableBoss {
     @Override
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource damageSource, boolean recentlyHit) { // WE are hardcoding ts
         ItemStack slimeBlocks = Items.SLIME_BLOCK.getDefaultInstance();
+        ItemStack moreSlimeBlocks = Items.SLIME_BLOCK.getDefaultInstance();
         ItemStack diamondBlocks = Items.DIAMOND.getDefaultInstance();
 
-        slimeBlocks.setCount(128);
+        slimeBlocks.setCount(64);
+        moreSlimeBlocks.setCount(64);
+
         diamondBlocks.setCount(7);
 
         ItemEntity spawnedSlimeBlocks = spawnAtLocation(slimeBlocks);
+        ItemEntity spawnedMoreSlimeBlocks = spawnAtLocation(slimeBlocks);
+
         ItemEntity spawnedDiamondBlocks = spawnAtLocation(diamondBlocks);
 
         if (spawnedSlimeBlocks != null) spawnedSlimeBlocks.push(0.0D, random.nextDouble(), 0.0D);
+        if (spawnedMoreSlimeBlocks != null) spawnedMoreSlimeBlocks.push(0.0D, random.nextDouble(), 0.0D);
+
         if (spawnedDiamondBlocks != null) spawnedDiamondBlocks.push(0.0D, random.nextDouble(), 0.0D);
     }
 
