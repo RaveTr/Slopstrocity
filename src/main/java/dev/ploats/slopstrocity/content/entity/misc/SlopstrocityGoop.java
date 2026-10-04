@@ -60,6 +60,11 @@ public class SlopstrocityGoop extends AnimatableEntity { // No animations fn, bu
     }
 
     @Override
+    public boolean displayFireAnimation() {
+        return false;
+    }
+
+    @Override
     protected void readAdditionalSaveData(CompoundTag compoundTag) {
         setLifetime(compoundTag.getInt("Lifetime"));
 
