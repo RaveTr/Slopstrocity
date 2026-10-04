@@ -137,7 +137,10 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
     @Override
     public void tick() {
         owner.getNavigation().stop(); // JIC
-        owner.setRollingBlunderTicks((int) curTick++);
+
+        this.curTick++;
+
+        owner.setRollingBlunderTicks((int) curTick);
 
         if (curTick == ROLL_START_TICK) new ScreenShakeEffect(owner.blockPosition(), 23.5D, 0.0158F, 24.235F, 1.0F).enqueue(owner.level());
 
