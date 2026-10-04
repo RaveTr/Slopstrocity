@@ -40,10 +40,9 @@ public abstract class AnimatedProjectileRenderer<P extends Projectile, EM extend
 
         parentModel.setupAnim(pEntity, 0.0F, 0.0F, offsetAge, wrappedYawRot, pitchRot);
 
-        pPoseStack.translate(0.0D, -1.55F, 0.0D);
+        pPoseStack.translate(0.0D, -getYRenderOffset(pEntity), 0.0D);
 
-        pPoseStack.mulPose(Axis.YP.rotationDegrees(wrappedYawRot));
-        pPoseStack.mulPose(Axis.ZP.rotationDegrees(pitchRot));
+        applyModelRotation(pEntity, pPartialTick, pPoseStack, wrappedYawRot, pitchRot);
 
         boolean isVisible = isVisible(pEntity);
         boolean isTranslucent = isTranslucent(pEntity);
@@ -65,6 +64,21 @@ public abstract class AnimatedProjectileRenderer<P extends Projectile, EM extend
 
     public void baseRender(P pEntity, float pEntityYaw, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
         super.render(pEntity, pEntityYaw, pPartialTick, pPoseStack, pBuffer, pPackedLight);
+    }
+
+    public boolean shouldRotateTowardsMovementByDefault(P ownerProjectile) {
+        return true;
+    }
+
+    protected void applyModelRotation(P pEntity, float pPartialTick, PoseStack pPoseStack, float wrappedYawRot, float pitchRot) {
+        if (shouldRotateTowardsMovementByDefault(pEntity)) {
+            pPoseStack.mulPose(Axis.YP.rotationDegrees(wrappedYawRot));
+            pPoseStack.mulPose(Axis.ZP.rotationDegrees(pitchRot));
+        }
+    }
+
+    public float getYRenderOffset(P ownerProjectile) {
+        return 1.55F;
     }
 
     public int getPackedColor(P owner, boolean isTranslucent) {

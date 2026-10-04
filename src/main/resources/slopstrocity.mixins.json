@@ -2,7 +2,9 @@
   "required": true,
   "package": "dev.ploats.slopstrocity.mixins",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
+  "mixins": [
+    "worldgen.TreeFeatureMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

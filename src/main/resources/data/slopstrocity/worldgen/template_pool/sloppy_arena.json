@@ -1,0 +1,42 @@
+{
+  "name": "slopstrocity:sloppy_arena",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "slopstrocity:slopping_arena/slopping_arena_1",
+        "projection": "rigid",
+        "processors": "slopstrocity:slopping_arena"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "slopstrocity:slopping_arena/slopping_arena_2",
+        "projection": "rigid",
+        "processors": "slopstrocity:slopping_arena"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "slopstrocity:slopping_arena/slopping_arena_3",
+        "projection": "rigid",
+        "processors": "slopstrocity:slopping_arena"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "slopstrocity:slopping_arena/slopping_arena_4",
+        "projection": "rigid",
+        "processors": "slopstrocity:slopping_arena"
+      }
+    }
+  ]
+}

@@ -69,12 +69,12 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
 
         if (target == null || !target.isAlive() || !target.isAttackable()) return false;
 
-        return (--curCooldown <= 0.0D) && MathUtil.isBetween(owner.distanceTo(target), minInitiationRange, maxInitiationRange) && owner.getRandom().nextDouble() >= 0.9D;
+        return (--curCooldown <= 0.0D) && !owner.isDoozy() && MathUtil.isBetween(owner.distanceTo(target), minInitiationRange, maxInitiationRange) && owner.getRandom().nextDouble() >= 0.9D;
     }
 
     @Override
     public boolean canContinueToUse() {
-        return owner != null && !owner.isDeadOrDying() && curTick < ATTACK_END_TICK;
+        return owner != null && !owner.isDeadOrDying() && !owner.isDoozy() && curTick < ATTACK_END_TICK;
     }
 
     @Override
@@ -111,7 +111,7 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
         owner.setDeltaMovement(0.0D, owner.getDeltaMovement().y, 0.0D);
 
         owner.stopAnimation(Slopstrocity.ROLLING_BLUNDER_ATTACK_ANIM);
-        owner.playAnimation(Slopstrocity.IDLE_ANIM, true);
+        owner.setTopsyTurvyDuration((int) (owner.getRandom().nextInt(2, 5) * 1.79D) * 20); // TODO Maybe unsnap ts
     }
 
     @Override
@@ -121,7 +121,7 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
 
     @Override
     public boolean isInterruptable() {
-        return owner.isDeadOrDying();
+        return owner.isDeadOrDying() || owner.isDoozy();
     }
 
     @Override

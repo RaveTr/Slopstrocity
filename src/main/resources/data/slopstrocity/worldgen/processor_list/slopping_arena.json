@@ -1,0 +1,16 @@
+{
+  "processors": [
+    {
+      "processor_type": "minecraft:protected_blocks",
+      "value": "#slopstrocity:slopping_arena_irreplaceable"
+    },
+    {
+      "processor_type": "minecraft:protected_blocks",
+      "value": "#minecraft:features_cannot_replace"
+    },
+    {
+      "processor_type": "slopstrocity:slopping_arena_mossifier",
+      "mossiness": 0.67
+    }
+  ]
+}

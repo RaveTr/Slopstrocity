@@ -17,16 +17,22 @@ public abstract class AnimatableHurtingProjectile extends AbstractHurtingProject
     private final Object2ObjectOpenHashMap<String, IntObjectImmutablePair<AnimationState>> cachedAnimationStates = new Object2ObjectOpenHashMap<>();
     private boolean requiresServerAnimTicking = true;
 
-    public AnimatableHurtingProjectile(EntityType<? extends AnimatableHurtingProjectile> pEntityType, Level pLevel) {
-        super(pEntityType, pLevel);
+    protected AnimatableHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, Level level) {
+        super(entityType, level);
+
+        setNoGravity(false);
     }
 
-    public AnimatableHurtingProjectile(EntityType<? extends AnimatableHurtingProjectile> pEntityType, double pX, double pY, double pZ, double pOffsetX, double pOffsetY, double pOffsetZ, Level pLevel) {
-        super(pEntityType, pX, pY, pZ, new Vec3(pOffsetX, pOffsetY, pOffsetZ), pLevel);
+    protected AnimatableHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, double x, double y, double z, Level level) {
+        super(entityType, x, y, z, level);
     }
 
-    public AnimatableHurtingProjectile(EntityType<? extends AnimatableHurtingProjectile> pEntityType, LivingEntity pShooter, double pOffsetX, double pOffsetY, double pOffsetZ, Level pLevel) {
-        super(pEntityType, pShooter, new Vec3(pOffsetX, pOffsetY, pOffsetZ), pLevel);
+    public AnimatableHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, double x, double y, double z, Vec3 movement, Level level) {
+        super(entityType, x, y, z, movement, level);
+    }
+
+    public AnimatableHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, LivingEntity owner, Vec3 movement, Level level) {
+        super(entityType, owner, movement, level);
     }
 
     protected abstract void tickClientAnimations();
@@ -49,7 +55,11 @@ public abstract class AnimatableHurtingProjectile extends AbstractHurtingProject
         IntObjectImmutablePair<AnimationState> targetAnim = getCachedAnimationStates().getOrDefault(animationStateName, null);
 
         if (targetAnim == null) return;
-        if (!level().isClientSide()) PacketDistributor.sendToPlayersTrackingEntityAndSelf(this, new AnimationPlayPayload(getId(), animationStateName, forcePose));
+        if (!level().isClientSide()) {
+            targetAnim.second().startIfStopped(tickCount);
+
+            PacketDistributor.sendToPlayersTrackingEntityAndSelf(this, new AnimationPlayPayload(getId(), animationStateName, forcePose));
+        }
         if (targetAnim.right() != null) { // Extra guard check
             if (forcePose) getCachedAnimationStates().keySet().stream().filter(animName -> !animName.equals(animationStateName)).forEach(this::stopAnimation);
 
@@ -129,6 +139,8 @@ public abstract class AnimatableHurtingProjectile extends AbstractHurtingProject
 
             tickServerAnimations();
         }
+
+        applyGravity();
 
         super.tick();
     }

@@ -3,6 +3,7 @@ package dev.ploats.slopstrocity;
 import com.mojang.logging.LogUtils;
 import dev.ploats.slopstrocity.content.registry.SlopstrocityEntityTypes;
 import dev.ploats.slopstrocity.content.registry.SlopstrocitySoundEvents;
+import dev.ploats.slopstrocity.content.registry.SlopstrocityStructureProcessorsTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -19,6 +20,7 @@ public class SlopstrocityMod { // The entity class' name would've been the exact
     public SlopstrocityMod(IEventBus modEventBus, ModContainer modContainer) {
         SlopstrocityEntityTypes.ENTITY_TYPES.register(modEventBus);
         SlopstrocitySoundEvents.SOUND_EVENTS.register(modEventBus);
+        SlopstrocityStructureProcessorsTypes.STRUCTURE_PROCESSOR_TYPES.register(modEventBus);
     }
 
     public static ResourceLocation prefix(String path) {

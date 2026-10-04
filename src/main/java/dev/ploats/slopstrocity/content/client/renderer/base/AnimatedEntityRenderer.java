@@ -38,7 +38,10 @@ public abstract class AnimatedEntityRenderer<E extends Entity, EM extends Entity
         float offsetAge = pEntity.tickCount + pPartialTick;
 
         parentModel.setupAnim(pEntity, 0.0F, 0.0F, offsetAge, yawRot, pitchRot);
-        pPoseStack.translate(0.0D, -1.6F, 0.0D);
+        pPoseStack.translate(0.0D, -getYRenderOffset(pEntity), 0.0D);
+        // Hook for entity models that have to be laid out along something other than the entity's own yaw/pitch (e.g. a
+        // splat aligned to the block face it was painted on). Defaults to doing nothing.
+        applyModelRotation(pEntity, pPartialTick, pPoseStack, yawRot, pitchRot);
 
         boolean isVisible = isVisible(pEntity);
         boolean isTranslucent = isTranslucent(pEntity);
@@ -60,6 +63,18 @@ public abstract class AnimatedEntityRenderer<E extends Entity, EM extends Entity
 
     public void baseRender(E pEntity, float pEntityYaw, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
         super.render(pEntity, pEntityYaw, pPartialTick, pPoseStack, pBuffer, pPackedLight);
+    }
+
+    public float getYRenderOffset(E owner) {
+        return 1.6F;
+    }
+
+    /**
+     * Adjusts the pose stack just before the model is drawn. Subclasses override this to align their model with
+     * something other than the entity's own rotation; the default leaves the pose untouched.
+     */
+    protected void applyModelRotation(E pEntity, float pPartialTick, PoseStack pPoseStack, float wrappedYawRot, float pitchRot) {
+
     }
 
     public int getPackedColor(E owner, boolean isTranslucent) {

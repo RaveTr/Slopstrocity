@@ -1,0 +1,18 @@
+{
+  "start_pool": "slopstrocity:sloppy_arena",
+  "biomes": [
+    "minecraft:jungle",
+    "minecraft:bamboo_jungle"
+  ],
+  "type": "minecraft:jigsaw",
+  "step": "surface_structures",
+  "project_start_to_heightmap": "WORLD_SURFACE_WG",
+  "spawn_overrides": {},
+  "terrain_adaptation": "beard_box",
+  "size": 5,
+  "start_height": {
+    "absolute": 0
+  },
+  "max_distance_from_center": 80,
+  "use_expansion_hack": false
+}

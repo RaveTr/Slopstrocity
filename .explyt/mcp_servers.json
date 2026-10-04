@@ -1,0 +1,6 @@
+{
+    "IDE MCP Server": {
+        "url": "http://IDE-MCP-SERVER/stream",
+        "type": "http"
+    }
+}

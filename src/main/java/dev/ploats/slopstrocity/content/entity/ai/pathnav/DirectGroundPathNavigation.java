@@ -25,9 +25,10 @@ public class DirectGroundPathNavigation extends GroundPathNavigation {
     }
 
     @Override
-    protected PathFinder createPathFinder(int maxNodes) {
+    protected @NotNull PathFinder createPathFinder(int maxNodes) {
         this.nodeEvaluator = new WalkNodeEvaluator();
         this.nodeEvaluator.setCanPassDoors(true);
+
         return new BandaidPathFinder(nodeEvaluator, maxNodes);
     }
 
@@ -50,8 +51,7 @@ public class DirectGroundPathNavigation extends GroundPathNavigation {
         }
 
         if (tryTruncateNodes(curPath, pathLength, entityPos, center, maxArea)) {
-            if (followingPath(curPath, 0.2F)
-                || elevationChangedFor(curPath) && followingPath(curPath, mob.getBbWidth() * 0.5F) && canCutCorner(curPath.getNextNode().type)) {
+            if (followingPath(curPath, 0.2F) || elevationChangedFor(curPath) && followingPath(curPath, mob.getBbWidth() * 0.5F) && canCutCorner(curPath.getNextNode().type)) {
                 curPath.setNextNodeIndex(curPath.getNextNodeIndex() + 1);
             }
         }
@@ -203,6 +203,7 @@ public class DirectGroundPathNavigation extends GroundPathNavigation {
     }
 
     public static class BandaidPathFinder extends PathFinder {
+
         public BandaidPathFinder(NodeEvaluator processor, int maxVisitedNodes) {
             super(processor, maxVisitedNodes);
         }
@@ -232,10 +233,13 @@ public class DirectGroundPathNavigation extends GroundPathNavigation {
         @Override
         public @NotNull Vec3 getEntityPosAtNode(Entity pathEntity, int index) {
             Node nextPos = getNode(index);
+
             double x = nextPos.x + Math.floor(pathEntity.getBbWidth() + 1.0F) * 0.5D;
             double y = nextPos.y;
             double z = nextPos.z + Math.floor(pathEntity.getBbWidth() + 1.0F) * 0.5D;
+
             Vec3 newNextPos = new Vec3(x, y, z);
+
             return newNextPos;
         }
 

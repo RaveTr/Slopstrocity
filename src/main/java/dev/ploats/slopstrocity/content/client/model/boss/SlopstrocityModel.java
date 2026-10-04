@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(SlopstrocityMod.prefix("slopstrocity"), "main"); // Look at the imports
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(SlopstrocityMod.prefix("slopstrocity"), "main");
     private final ModelPart root;
     private final ModelPart all;
     private final ModelPart bone;
@@ -114,6 +114,10 @@ public class SlopstrocityModel extends WrappedHierarchicalModel<Slopstrocity> {
         animate(owner.getLeapChequeEndAttackAnimState(), SlopstrocityAnimations.LEAP_END, ageInTicks, curTickRateMultiplier);
         animate(owner.getSloppyCleanupLeftAttackAnimState(), SlopstrocityAnimations.CLEANUP_LEFT, ageInTicks, curTickRateMultiplier);
         animate(owner.getSloppyCleanupRightAttackAnimState(), SlopstrocityAnimations.CLEANUP_RIGHT, ageInTicks, curTickRateMultiplier);
+
+        // State
+        animate(owner.getDoozyAnimState(), SlopstrocityAnimations.DOOZY, ageInTicks, curTickRateMultiplier);
+        animate(owner.getUndoozyAnimState(), SlopstrocityAnimations.UNDOOZY, ageInTicks, curTickRateMultiplier);
 
         // Walk Cycle
         if (((owner.isMoving() && !owner.isFunctionallyAnimatingAttack()) || owner.hurtTime > 0) && owner.getAttackId() != Slopstrocity.ROLLING_BLUNDER_ATTACK_ID && owner.getAttackId() != Slopstrocity.LEAP_CHEQUE_ATTACK_ID) animateWalk(SlopstrocityAnimations.WALK, limbSwing, limbSwingAmount, 1.5F * curTickRateMultiplier, 1.0F);

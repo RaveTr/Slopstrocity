@@ -6,13 +6,21 @@ import dev.ploats.slopstrocity.content.entity.ai.goal.hostile.BandaidMoveToTarge
 import dev.ploats.slopstrocity.content.entity.ai.goal.slopstrocity.SlopstrocityLeapChequeAttackGoal;
 import dev.ploats.slopstrocity.content.entity.ai.goal.slopstrocity.SlopstrocityRollingBlunderAttackGoal;
 import dev.ploats.slopstrocity.content.entity.base.AnimatableBoss;
+import dev.ploats.slopstrocity.content.entity.misc.WrappedFallingBlockEntity;
+import dev.ploats.slopstrocity.content.entity.projectile.SlopstrocitySpit;
 import dev.ploats.slopstrocity.content.registry.SlopstrocitySoundEvents;
+import dev.ploats.slopstrocity.util.EntityUtil;
 import dev.ploats.slopstrocity.util.MathUtil;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.BossEvent;
@@ -27,9 +35,9 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -55,6 +63,13 @@ public class Slopstrocity extends AnimatableBoss {
     public static final byte ROLLING_BLUNDER_ATTACK_ID = 4;
     public static final byte LEAP_CHEQUE_ATTACK_ID = 5;
     public static final byte SLOPPY_CLEANUP_ATTACK_ID = 6;
+    public static final int SLOP_SPIT_PROJECTILE_COUNT = 5;
+    public static final double SLOP_SPIT_VOLLEY_ARC = 67.0D;
+    public static final double SLOP_SPIT_VOLLEY_RADIUS = 9.0D;
+    public static final double SLOP_SPIT_VOLLEY_LIFT = 1.0D;
+    public static final double SLOP_SPIT_Y_MOVEMENT_MULTIPLIER = 0.52D;
+    public static final double SLOP_SPIT_VELOCITY = 0.05D;
+    public static final double SLOP_SPIT_INACCURACY = 0.0D;
     public static final String IDLE_ANIM = "Idle";
     public static final String DEATH_ANIM = "Death";
     public static final String SLOP_SLAM_ATTACK_ANIM = "Slop Slam Attack";
@@ -67,6 +82,10 @@ public class Slopstrocity extends AnimatableBoss {
     public static final String LEAP_CHEQUE_END_ATTACK_ANIM = "Leap Cheque Attack (End)";
     public static final String SLOPPY_CLEANUP_LEFT_ATTACK_ANIM = "Sloppy Cleanup Attack (Left)";
     public static final String SLOPPY_CLEANUP_RIGHT_ATTACK_ANIM = "Sloppy Cleanup Attack (Right)";
+    public static final String DOOZY_ANIM = "Doozy";
+    public static final String UNDOOZY_ANIM = "Un-Doozy";
+    private static final EntityDataAccessor<Integer> TOPSY_TURVY_TICKS = SynchedEntityData.defineId(Slopstrocity.class, EntityDataSerializers.INT); // "Ticks" sounds way goofier
+    private static final EntityDataAccessor<Integer> TOPSY_TURVY_DURATION = SynchedEntityData.defineId(Slopstrocity.class, EntityDataSerializers.INT);
     private static final List<DeferredHolder<SoundEvent, ? extends SoundEvent>> IDLE_SOUND_EVENTS = SlopstrocitySoundEvents.SOUND_EVENTS.getEntries().stream()
             .filter(soundEventDeferredHolder -> soundEventDeferredHolder.getRegisteredName().contains("slopstrocity_idle_"))
             .collect(Collectors.toCollection(ObjectArrayList::new));
@@ -82,7 +101,9 @@ public class Slopstrocity extends AnimatableBoss {
     private final AnimationState leapChequeEndAttackAnimState = wrapState(LEAP_CHEQUE_END_ATTACK_ANIM);
     private final AnimationState sloppyCleanupLeftAttackAnimState = wrapState(SLOPPY_CLEANUP_LEFT_ATTACK_ANIM);
     private final AnimationState sloppyCleanupRightAttackAnimState = wrapState(SLOPPY_CLEANUP_RIGHT_ATTACK_ANIM);
-    private final ServerBossEvent bossEvent = new ServerBossEvent(Component.translatable("entity.slopstrocity.slopstrocity"), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.PROGRESS);
+    private final AnimationState doozyAnimState = wrapState(DOOZY_ANIM);
+    private final AnimationState undoozyAnimState = wrapState(UNDOOZY_ANIM);
+    private final ServerBossEvent bossEvent = createBossEvent(Component.translatable("entity.slopstrocity.slopstrocity").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.PROGRESS);
     private double aeOffset = 1.0D;
     private double maxAEOffset = 1.0D;
     private Runnable curQuakeCall = () -> {}; // Way too generic but genuinely who tf cares atp
@@ -110,10 +131,64 @@ public class Slopstrocity extends AnimatableBoss {
     }
 
     @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+
+        builder.define(TOPSY_TURVY_TICKS, 0);
+        builder.define(TOPSY_TURVY_DURATION, 0);
+    }
+
+    public int getTopsyTurvyTicks() {
+        return entityData.get(TOPSY_TURVY_TICKS);
+    }
+
+    public void setTopsyTurvyTicks(int topsyTurvyTicks) {
+        entityData.set(TOPSY_TURVY_TICKS, topsyTurvyTicks);
+    }
+
+    public void incrementTopsyTurvyTicks(int incr) {
+        setTopsyTurvyTicks(getTopsyTurvyTicks() + incr);
+    }
+
+    public int getTopsyTurvyDuration() {
+        return entityData.get(TOPSY_TURVY_DURATION);
+    }
+
+    public void setTopsyTurvyDuration(int topsyTurvyDuration) {
+        entityData.set(TOPSY_TURVY_DURATION, topsyTurvyDuration);
+    }
+
+    public boolean isDoozy() {
+        return getTopsyTurvyDuration() > 0 && getTopsyTurvyTicks() < getTopsyTurvyDuration();
+    }
+
+    @Override
     protected void registerGoals() {
-        goalSelector.addGoal(1, new BandaidMoveToTargetGoal(this, 1.4D)
-                .satisfactoryDist(4.5D));
-        goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 1.1D));
+        goalSelector.addGoal(1, new BandaidMoveToTargetGoal(this, 1.4D) {
+
+            @Override
+            public boolean canUse() {
+                return super.canUse() && !isDoozy();
+            }
+
+            @Override
+            public boolean canContinueToUse() {
+                return super.canContinueToUse() && !isDoozy();
+            }
+
+        }.satisfactoryDist(4.5D));
+        goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 1.1D) {
+
+            @Override
+            public boolean canUse() {
+                return super.canUse() && !isDoozy();
+            }
+
+            @Override
+            public boolean canContinueToUse() {
+                return super.canContinueToUse() && !isDoozy();
+            }
+        });
 
         goalSelector.addGoal(0, new AnimatableAttackGoal<>(this, ObjectArrayList.of(SLOP_SLAM_ATTACK_ANIM), 48.8D, true, SLOP_SLAM_ATTACK_ID)
                 .attackArc(360.0D)
@@ -122,7 +197,7 @@ public class Slopstrocity extends AnimatableBoss {
                 .attackTickCooldown(4.0D)
                 .initiationRange(7.0D)
                 .performDefaultAttack(false)
-                .additionalStartConditions((animatable) -> animatable.random.nextDouble() >= 0.85D)
+                .additionalStartConditions((animatable) -> !animatable.isDoozy() && animatable.random.nextDouble() >= 0.85D)
                 .actionOnStart((animatable, target, potentialTargets, curTick) -> {
                     animatable.stopAnimation(IDLE_ANIM);
                 })
@@ -145,7 +220,7 @@ public class Slopstrocity extends AnimatableBoss {
                 .attackTickCooldown(4.0D)
                 .initiationRange(9.0D)
                 .performDefaultAttack(false)
-                .additionalStartConditions((animatable) -> animatable.random.nextDouble() >= 0.84D)
+                .additionalStartConditions((animatable) -> !animatable.isDoozy() && animatable.random.nextDouble() >= 0.84D)
                 .actionOnStart((animatable, target, potentialTargets, curTick) -> {
                     animatable.stopAnimation(IDLE_ANIM);
                 })
@@ -172,7 +247,7 @@ public class Slopstrocity extends AnimatableBoss {
                 .attackTickCooldown(4.0D)
                 .initiationRange(9.0D)
                 .performDefaultAttack(false)
-                .additionalStartConditions((animatable) -> animatable.random.nextDouble() >= 0.91D)
+                .additionalStartConditions((animatable) -> !animatable.isDoozy() && animatable.random.nextDouble() >= 0.91D)
                 .actionOnStart((animatable, target, potentialTargets, curTick) -> {
                     animatable.stopAnimation(IDLE_ANIM);
                 })
@@ -191,25 +266,46 @@ public class Slopstrocity extends AnimatableBoss {
                 .attackFrame(17.6D, 18.0D)
                 .attackTickCooldown(80.0D)
                 .initiationRange(16.0D)
-                .additionalStartConditions((animatable) -> animatable.random.nextDouble() >= 0.92D || (animatable.getTarget() != null && animatable.getTarget().distanceTo(animatable) >= 14.0D && random.nextDouble() >= 0.35D))
+                .additionalStartConditions((animatable) -> !animatable.isDoozy() && (animatable.random.nextDouble() >= 0.92D || (animatable.getTarget() != null && animatable.getTarget().distanceTo(animatable) >= 14.0D && random.nextDouble() >= 0.35D)))
                 .actionOnStart((animatable, target, potentialTargets, curTick) -> {
                     animatable.stopAnimation(IDLE_ANIM);
                 })
                 .actionOnAttack((animatable, target, potentialTargets, curTick) -> {
                     new ScreenShakeEffect(animatable.blockPosition(), 50.9D, 0.01754F, 40.5F, 1.121F).enqueue(animatable.level());
 
+                    EntityUtil.spitVolley(animatable, SLOP_SPIT_PROJECTILE_COUNT, SLOP_SPIT_VOLLEY_ARC, SLOP_SPIT_VOLLEY_RADIUS, SLOP_SPIT_VOLLEY_LIFT, SLOP_SPIT_Y_MOVEMENT_MULTIPLIER, SLOP_SPIT_VELOCITY, SLOP_SPIT_INACCURACY, mouthPos -> {
+                        SlopstrocitySpit spit = new SlopstrocitySpit(animatable, Vec3.ZERO, animatable.level());
+
+                        spit.setPos(mouthPos.x, mouthPos.y, mouthPos.z);
+
+                        return spit;
+                    });
+
                     playSound(SlopstrocitySoundEvents.SLOPSTROCITY_SLOP_SPIT_ATTACK.get());
                 })
                 .actionOnEnd((animatable, target, potentialTargets, curTick) -> animatable.playAnimation(IDLE_ANIM, true)));
 
-        targetSelector.addGoal(0, new HurtByTargetGoal(this));
-        targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        targetSelector.addGoal(0, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
+        targetSelector.addGoal(0, new HurtByTargetGoal(this, Slopstrocity.class).setAlertOthers(Slopstrocity.class));
+        targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
 
     @Override
     protected void tickClientAnimations() {
-        if (!isMoving() && !isFunctionallyAnimatingAttack() && !isDeadOrDying()) playAnimation(IDLE_ANIM);
+        if (!isMoving() && !isDoozy() && !isFunctionallyAnimatingAttack() && !isDeadOrDying()) {
+            playAnimation(IDLE_ANIM);
+
+            stopAnimation(DOOZY_ANIM);
+            stopAnimation(UNDOOZY_ANIM);
+        } else if (isDoozy()) {
+            if (getTopsyTurvyTicks() >= getTopsyTurvyDuration() - 5) { // Fragile ahh check
+                stopAnimation(DOOZY_ANIM);
+                playAnimation(UNDOOZY_ANIM, true);
+            } else playAnimation(DOOZY_ANIM, true);
+        } else {
+            stopAnimation(DOOZY_ANIM);
+            stopAnimation(UNDOOZY_ANIM);
+        }
 
         if (isDeadOrDying()) playAnimation(DEATH_ANIM, true);
         else stopAnimation(DEATH_ANIM);
@@ -221,11 +317,33 @@ public class Slopstrocity extends AnimatableBoss {
             if (curQuakeCall != null) curQuakeCall.run();
             if (aeOffset++ > maxAEOffset) this.kickoffQuake = false;
         }
+
+        if (getTopsyTurvyDuration() > 0) {
+            incrementTopsyTurvyTicks(1);
+
+            if (getTopsyTurvyTicks() >= getTopsyTurvyDuration()) {
+                setTopsyTurvyTicks(0);
+                setTopsyTurvyDuration(0);
+
+                stopAnimation(DOOZY_ANIM);
+                stopAnimation(UNDOOZY_ANIM);
+            }
+        }
     }
 
     @Override
     protected void tickGeneralClient() {
 
+    }
+
+    @Override
+    public void die(DamageSource pDamageSource) {
+        super.die(pDamageSource);
+
+        if (!level().isClientSide()) {
+            setTopsyTurvyTicks(0);
+            setTopsyTurvyDuration(0);
+        }
     }
 
     @Override
@@ -315,6 +433,22 @@ public class Slopstrocity extends AnimatableBoss {
         return false;
     }
 
+    @Override
+    public void addAdditionalSaveData(CompoundTag compound) {
+        super.addAdditionalSaveData(compound);
+
+        compound.putInt("TopsyTurvyTicks", getTopsyTurvyTicks());
+        compound.putInt("TopsyTurvyDuration", getTopsyTurvyDuration());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+
+        setTopsyTurvyTicks(compound.getInt("TopsyTurvyTicks"));
+        setTopsyTurvyDuration(compound.getInt("TopsyTurvyDuration"));
+    }
+
     public AnimationState getIdleAnimState() {
         return idleAnimState;
     }
@@ -363,6 +497,14 @@ public class Slopstrocity extends AnimatableBoss {
         return sloppyCleanupRightAttackAnimState;
     }
 
+    public AnimationState getDoozyAnimState() {
+        return doozyAnimState;
+    }
+
+    public AnimationState getUndoozyAnimState() {
+        return undoozyAnimState;
+    }
+
     public double getCurrentAnimatedBlockOffset() {
         return aeOffset;
     }
@@ -371,7 +513,7 @@ public class Slopstrocity extends AnimatableBoss {
         if (target != null && !target.noPhysics) hurtTargetAngularly(animatable, target);
 
         for (LivingEntity potentialTarget : potentialTargets) {
-            if (potentialTarget == null || potentialTarget.noPhysics || potentialTarget == this || potentialTarget == target) continue;
+            if (potentialTarget == null || potentialTarget instanceof Slopstrocity || potentialTarget.noPhysics || potentialTarget == this || potentialTarget == target) continue;
 
             hurtTargetAngularly(animatable, potentialTarget);
         }
@@ -399,6 +541,8 @@ public class Slopstrocity extends AnimatableBoss {
         Level curLevel = level();
 
         if (curLevel.isClientSide()) return;
+
+        boolean hasMobGriefing = level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
 
         double curYaw = Math.toRadians(baseQuakeYaw.orElse(getYRot()));
         double facingX = -Math.sin(curYaw);
@@ -433,18 +577,20 @@ public class Slopstrocity extends AnimatableBoss {
 
             boingEntitiesInColumn(curLevel, surface, intensity);
 
-            FallingBlockEntity fallingBlock = new FallingBlockEntity(EntityType.FALLING_BLOCK, curLevel); // FallingBlockEntity#fall sets initial delta movement to 0 for whatever reason and does some other things that make it not very feasible with falling blocks that move around instantaneously the moment they spawn
+            // (Also too lazy to make an EntityType for it so eat ts)
+            WrappedFallingBlockEntity fallingBlock = new WrappedFallingBlockEntity(EntityType.FALLING_BLOCK, level()); // FallingBlockEntity#fall sets initial delta movement to 0 for whatever reason and does some other things that make it not very feasible with falling blocks that move around instantaneously the moment they spawn
 
             fallingBlock.blockState = targetState.hasProperty(BlockStateProperties.WATERLOGGED) ? targetState.setValue(BlockStateProperties.WATERLOGGED, Boolean.FALSE) : targetState;
             fallingBlock.dropItem = false;
-            fallingBlock.blocksBuilding = true;
+            fallingBlock.blocksBuilding = hasMobGriefing;
 
             fallingBlock.setPos(x + 0.5D, surface.getY(), z + 0.5D);
             fallingBlock.setStartPos(fallingBlock.blockPosition());
 
             fallingBlock.setDeltaMovement(0.0D, bopVelocity, 0.0D);
 
-            curLevel.setBlock(surface, targetState.getFluidState().createLegacyBlock(), Block.UPDATE_ALL);
+            if (hasMobGriefing) curLevel.setBlock(surface, targetState.getFluidState().createLegacyBlock(), Block.UPDATE_ALL);
+
             curLevel.addFreshEntity(fallingBlock);
         }
     }
@@ -454,11 +600,12 @@ public class Slopstrocity extends AnimatableBoss {
         AABB targetCol = new AABB(surface.getX() - 0.35D, surface.getY() + 0.5D, surface.getZ() - 0.35D, surface.getX() + 1.35D, surface.getY() + bopHeight, surface.getZ() + 1.35D);
         double upward = 0.55D + 0.15D * intensity;
 
-        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, targetCol)) {
-            if (entity == this) continue;
+        for (LivingEntity potentialTarget : level.getEntitiesOfClass(LivingEntity.class, targetCol)) {
+            if (potentialTarget == this) continue;
 
-            Vec3 delta = entity.getDeltaMovement();
-            entity.setDeltaMovement(delta.x, Math.max(delta.y, upward), delta.z);
+            Vec3 delta = potentialTarget.getDeltaMovement();
+
+            potentialTarget.setDeltaMovement(delta.x, Math.max(delta.y, upward), delta.z);
         }
     }
 

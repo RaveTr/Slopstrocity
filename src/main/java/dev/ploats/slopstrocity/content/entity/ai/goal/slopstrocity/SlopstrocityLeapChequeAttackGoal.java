@@ -73,12 +73,12 @@ public class SlopstrocityLeapChequeAttackGoal extends Goal {
 
         if (target == null || !target.isAlive() || !target.isAttackable()) return false;
 
-        return (--curCooldown <= 0.0D) && MathUtil.isBetween(owner.distanceTo(target), minInitiationRange, maxInitiationRange) && owner.getRandom().nextDouble() >= 0.85D;
+        return (--curCooldown <= 0.0D) && !owner.isDoozy() && MathUtil.isBetween(owner.distanceTo(target), minInitiationRange, maxInitiationRange) && owner.getRandom().nextDouble() >= 0.85D;
     }
 
     @Override
     public boolean canContinueToUse() {
-        if (owner == null || owner.isDeadOrDying()) return false;
+        if (owner == null || owner.isDeadOrDying() || owner.isDoozy()) return false;
 
         return curPhase != Phase.END || curTick < END_ANIM_TICKS;
     }
@@ -124,7 +124,7 @@ public class SlopstrocityLeapChequeAttackGoal extends Goal {
 
     @Override
     public boolean isInterruptable() {
-        return owner.isDeadOrDying();
+        return owner.isDeadOrDying() || owner.isDoozy();
     }
 
     @Override
