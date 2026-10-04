@@ -33,4 +33,23 @@ public class SlopstrocitySoundEvents {
     public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_SLOP_SLAM_ATTACK = SOUND_EVENTS.register("slopstrocity_slop_slam_attack", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_slop_slam_attack")));
     public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_SLOP_SPIT_ATTACK = SOUND_EVENTS.register("slopstrocity_slop_spit_attack", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_slop_spit_attack")));
     public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_SLOP_STOMP_ATTACK = SOUND_EVENTS.register("slopstrocity_slop_stomp_attack", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_slop_stomp_attack")));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_INTRO = SOUND_EVENTS.register("slopstrocity_rolling_blunder_attack_intro", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_rolling_blunder_attack_intro")));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_LOOP = SOUND_EVENTS.register("slopstrocity_rolling_blunder_attack_loop", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_rolling_blunder_attack_loop")));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_HIT = SOUND_EVENTS.register("slopstrocity_rolling_blunder_attack_hit", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_rolling_blunder_attack_hit")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_PINWHEEL_HIT = SOUND_EVENTS.register("slopstrocity_rolling_blunder_attack_pinwheel_hit", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_rolling_blunder_attack_pinwheel_hit")));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_OUTRO = SOUND_EVENTS.register("slopstrocity_rolling_blunder_attack_outro", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_rolling_blunder_attack_outro")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_OUTRO_HIT = SOUND_EVENTS.register("slopstrocity_rolling_blunder_attack_outro_hit", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_rolling_blunder_attack_outro_hit")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_NEAR_MISS = SOUND_EVENTS.register("slopstrocity_rolling_blunder_attack_outro_near_miss", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_rolling_blunder_attack_outro_near_miss")));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_END = SOUND_EVENTS.register("slopstrocity_rolling_blunder_attack_end", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_rolling_blunder_attack_end")));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_TOPSY_TURVY = SOUND_EVENTS.register("slopstrocity_topsy_turvy", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_topsy_turvy")));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> SLOPSTROCITY_BEARINGS_CAUGHT = SOUND_EVENTS.register("slopstrocity_bearings_caught", () -> SoundEvent.createVariableRangeEvent(SlopstrocityMod.prefix("slopstrocity_bearings_caught")));
+
+
 }

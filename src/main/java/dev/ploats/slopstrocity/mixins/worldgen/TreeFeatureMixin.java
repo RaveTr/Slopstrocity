@@ -27,7 +27,7 @@ public abstract class TreeFeatureMixin { // Mark my words, I'm redesigning Minec
     private static final ResourceKey<Structure> slopstrocity$KEY = ResourceKey.create(Registries.STRUCTURE, slopstrocity$ID);
 
     private TreeFeatureMixin() {
-        throw new IllegalAccessError("Attempted to construct instance of a Mixin Class! (TreeFeatureMixin)");
+        throw new IllegalAccessError("Attempted to construct a Mixin Class!");
     }
 
     @Inject(method = "place", at = @At("HEAD"), cancellable = true)
@@ -39,6 +39,7 @@ public abstract class TreeFeatureMixin { // Mark my words, I'm redesigning Minec
             BlockPos startOriginPos = context.origin();
             StructureStart sloppingArenaStart = structureManager.getStructureAt(startOriginPos, structRef.getDelegate().value());
 
+            if (sloppingArenaStart == StructureStart.INVALID_START) return;
             if (sloppingArenaStart.getPieces().isEmpty()) return; // Eagerly checking causes it to throw sometimes cuz of the pieces not yet being populated within the structure itself at the struct start gen point
 
             BoundingBox checkBox = sloppingArenaStart.getBoundingBox().inflatedBy(-18, -12, -18);

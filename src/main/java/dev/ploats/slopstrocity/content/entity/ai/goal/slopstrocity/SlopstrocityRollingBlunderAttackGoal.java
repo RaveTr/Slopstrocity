@@ -2,6 +2,7 @@ package dev.ploats.slopstrocity.content.entity.ai.goal.slopstrocity;
 
 import dev.ploats.slopstrocity.api.vfx.ScreenShakeEffect;
 import dev.ploats.slopstrocity.content.entity.boss.Slopstrocity;
+import dev.ploats.slopstrocity.content.registry.SlopstrocitySoundEvents;
 import dev.ploats.slopstrocity.util.MathUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -18,7 +19,7 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
     private static final double EPSILON = 1.0E-4D;
     private static final double ROLL_START_TICK = 9.0D;
     private static final double ROLL_END_TICK = 96.0D;
-    private static final double ATTACK_END_TICK = 112.0D;
+    public static final double ATTACK_END_TICK = 112.0D;
     private static final double RICOCHET_MAX_ARC_DEG = 70.0D;
     private static final double RICOCHET_TARGET_BIAS = 0.3D;
     private static final int RICOCHET_COOLDOWN = 2;
@@ -98,6 +99,10 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
 
         owner.getNavigation().stop();
         owner.setDeltaMovement(0.0D, owner.getDeltaMovement().y, 0.0D);
+
+        owner.setRollingBlunderTicks(0);
+
+        owner.playSound(SlopstrocitySoundEvents.SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_INTRO.get());
     }
 
     @Override
@@ -111,7 +116,12 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
         owner.setDeltaMovement(0.0D, owner.getDeltaMovement().y, 0.0D);
 
         owner.stopAnimation(Slopstrocity.ROLLING_BLUNDER_ATTACK_ANIM);
+
+        owner.setRollingBlunderTicks(0);
         owner.setTopsyTurvyDuration((int) (owner.getRandom().nextInt(2, 5) * 1.79D) * 20); // TODO Maybe unsnap ts
+
+        owner.playSound(SlopstrocitySoundEvents.SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_END.get());
+        owner.playSound((Math.abs(owner.getLastHurtMobTimestamp() - owner.tickCount) < 112 ? SlopstrocitySoundEvents.SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_OUTRO_HIT : SlopstrocitySoundEvents.SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_NEAR_MISS).get(), 2.0F, 1.0F);
     }
 
     @Override
@@ -127,7 +137,7 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
     @Override
     public void tick() {
         owner.getNavigation().stop(); // JIC
-        curTick++;
+        owner.setRollingBlunderTicks((int) curTick++);
 
         if (curTick == ROLL_START_TICK) new ScreenShakeEffect(owner.blockPosition(), 23.5D, 0.0158F, 24.235F, 1.0F).enqueue(owner.level());
 
@@ -220,6 +230,8 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
         } else newDirection = randomDirectionWithinArc(bounce); // Either we have no target or they're behind the wall, so just pick a random angle within an acute diameter of 70 degrees to ricochet to
 
         this.rollDirection = newDirection;
+
+        owner.playSound(SlopstrocitySoundEvents.SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_PINWHEEL_HIT.get());
 
         rollStraight();
     }
@@ -393,6 +405,8 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
 
         target.hurt(owner.level().damageSources().mobAttack(owner), Math.max(5.0F, 20.5F - owner.distanceTo(target)));
 
+        owner.setLastHurtMob(target);
+
         double targetAngle = (MathUtil.getAngleBetweenEntities(owner, target) + 90.0D) * Math.PI / 180.0D;
         double knockbackMultiplier = -2.22D * 0.7D;
 
@@ -401,5 +415,7 @@ public class SlopstrocityRollingBlunderAttackGoal extends Goal {
         double upwardKick = (owner.getRandom().nextDouble() * 2.0D + 0.2D) * 0.7D;
 
         target.setDeltaMovement(knockbackMultiplier * Math.cos(targetAngle), baseVertical + upwardKick, knockbackMultiplier * Math.sin(targetAngle));
+
+        if (target.hurtTime == target.hurtDuration) owner.playSound(SlopstrocitySoundEvents.SLOPSTROCITY_ROLLING_BLUNDER_ATTACK_HIT.get());
     }
 }

@@ -9,6 +9,7 @@ import dev.ploats.slopstrocity.content.entity.base.AnimatableBoss;
 import dev.ploats.slopstrocity.content.entity.misc.WrappedFallingBlockEntity;
 import dev.ploats.slopstrocity.content.entity.projectile.SlopstrocitySpit;
 import dev.ploats.slopstrocity.content.registry.SlopstrocitySoundEvents;
+import dev.ploats.slopstrocity.util.ClientUtil;
 import dev.ploats.slopstrocity.util.EntityUtil;
 import dev.ploats.slopstrocity.util.MathUtil;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -16,13 +17,17 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AnimationState;
@@ -35,8 +40,11 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -52,6 +60,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.stream.Collectors;
@@ -86,6 +95,7 @@ public class Slopstrocity extends AnimatableBoss {
     public static final String UNDOOZY_ANIM = "Un-Doozy";
     private static final EntityDataAccessor<Integer> TOPSY_TURVY_TICKS = SynchedEntityData.defineId(Slopstrocity.class, EntityDataSerializers.INT); // "Ticks" sounds way goofier
     private static final EntityDataAccessor<Integer> TOPSY_TURVY_DURATION = SynchedEntityData.defineId(Slopstrocity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> ROLLING_BLUNDER_TICKS = SynchedEntityData.defineId(Slopstrocity.class, EntityDataSerializers.INT);
     private static final List<DeferredHolder<SoundEvent, ? extends SoundEvent>> IDLE_SOUND_EVENTS = SlopstrocitySoundEvents.SOUND_EVENTS.getEntries().stream()
             .filter(soundEventDeferredHolder -> soundEventDeferredHolder.getRegisteredName().contains("slopstrocity_idle_"))
             .collect(Collectors.toCollection(ObjectArrayList::new));
@@ -113,6 +123,9 @@ public class Slopstrocity extends AnimatableBoss {
     private Optional<AABB> baseQuakeAabb = Optional.empty();
     private final LongOpenHashSet quakedColumns = new LongOpenHashSet();
     private final BlockPos.MutableBlockPos quakeScanPos = new BlockPos.MutableBlockPos();
+    private boolean loopedRollingBlunder = false; // Hacky lazy client-only flags cuz lazy
+    private boolean endedRollingBlunder = false;
+    private boolean topsyTurvied = false;
 
     public Slopstrocity(EntityType<? extends AnimatableBoss> entityType, Level level) {
         super(entityType, level);
@@ -136,6 +149,7 @@ public class Slopstrocity extends AnimatableBoss {
 
         builder.define(TOPSY_TURVY_TICKS, 0);
         builder.define(TOPSY_TURVY_DURATION, 0);
+        builder.define(ROLLING_BLUNDER_TICKS, 0);
     }
 
     public int getTopsyTurvyTicks() {
@@ -158,8 +172,45 @@ public class Slopstrocity extends AnimatableBoss {
         entityData.set(TOPSY_TURVY_DURATION, topsyTurvyDuration);
     }
 
+    public int getRollingBlunderTicks() {
+        return entityData.get(ROLLING_BLUNDER_TICKS);
+    }
+
+    public void setRollingBlunderTicks(int rollingBlunderTicks) {
+        entityData.set(ROLLING_BLUNDER_TICKS, rollingBlunderTicks);
+    }
+
+    public void incrementRollingBlunderTicks(int incr) {
+        setRollingBlunderTicks(getRollingBlunderTicks() + incr);
+    }
+
     public boolean isDoozy() {
         return getTopsyTurvyDuration() > 0 && getTopsyTurvyTicks() < getTopsyTurvyDuration();
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+
+        if (!level().isClientSide()) return;
+
+        if (Objects.equals(key, ATTACK_ID) && ((byte) entityData.get(key)) == ROLLING_BLUNDER_ATTACK_ID && getRollingBlunderTicks() == 0 && !loopedRollingBlunder) {
+            this.loopedRollingBlunder = true;
+
+            ClientUtil.enqueueRollingBlunderLoop(this);
+        }
+
+        if (Objects.equals(key, ROLLING_BLUNDER_TICKS) && ((int) entityData.get(key)) == 40 && !endedRollingBlunder) {
+            this.endedRollingBlunder = true;
+
+            ClientUtil.enqueueRollingBlunderOutro(this);
+        }
+
+        if (Objects.equals(key, TOPSY_TURVY_TICKS) && ((int) entityData.get(key)) == 1 && !topsyTurvied) {
+            this.topsyTurvied = true;
+
+            ClientUtil.enqueueTopsyTurvy(this);
+        }
     }
 
     @Override
@@ -291,16 +342,54 @@ public class Slopstrocity extends AnimatableBoss {
     }
 
     @Override
+    public void onRemovedFromLevel() {
+        super.onRemovedFromLevel();
+
+        new ScreenShakeEffect(blockPosition(), 67.98D, 0.00748F, 129.5F, 1.345F).enqueue(level());
+
+        for (int i = 0; i < 10; i++) {
+            float xOffset = (getRandom().nextFloat() - 0.5F) * 8.0F;
+            float yOffset = (getRandom().nextFloat() - 0.5F) * 4.0F;
+            float zOffset = (getRandom().nextFloat() - 0.5F) * 8.0F;
+
+            level().addParticle(ParticleTypes.EXPLOSION_EMITTER, getX() + (double) xOffset, getY() + 2.0 + (double) yOffset, getZ() + (double) zOffset, 0.0, 0.0, 0.0);
+        }
+
+        playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.0F, getRandom().nextFloat() + 0.67F);
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource damageSource, boolean recentlyHit) { // WE are hardcoding ts
+        ItemStack slimeBlocks = Items.SLIME_BLOCK.getDefaultInstance();
+        ItemStack diamondBlocks = Items.DIAMOND.getDefaultInstance();
+
+        slimeBlocks.setCount(128);
+        diamondBlocks.setCount(7);
+
+        ItemEntity spawnedSlimeBlocks = spawnAtLocation(slimeBlocks);
+        ItemEntity spawnedDiamondBlocks = spawnAtLocation(diamondBlocks);
+
+        if (spawnedSlimeBlocks != null) spawnedSlimeBlocks.push(0.0D, random.nextDouble(), 0.0D);
+        if (spawnedDiamondBlocks != null) spawnedDiamondBlocks.push(0.0D, random.nextDouble(), 0.0D);
+    }
+
+    @Override
     protected void tickClientAnimations() {
         if (!isMoving() && !isDoozy() && !isFunctionallyAnimatingAttack() && !isDeadOrDying()) {
             playAnimation(IDLE_ANIM);
 
             stopAnimation(DOOZY_ANIM);
             stopAnimation(UNDOOZY_ANIM);
+
+            this.loopedRollingBlunder = false;
+            this.endedRollingBlunder = false;
+            this.topsyTurvied = false;
         } else if (isDoozy()) {
             if (getTopsyTurvyTicks() >= getTopsyTurvyDuration() - 5) { // Fragile ahh check
                 stopAnimation(DOOZY_ANIM);
                 playAnimation(UNDOOZY_ANIM, true);
+
+                playSound(SlopstrocitySoundEvents.SLOPSTROCITY_BEARINGS_CAUGHT.get(), 1.0F, Mth.clamp(random.nextFloat() + 0.5F, 1.0F, 1.4F));
             } else playAnimation(DOOZY_ANIM, true);
         } else {
             stopAnimation(DOOZY_ANIM);

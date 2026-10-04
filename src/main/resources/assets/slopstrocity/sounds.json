@@ -60,6 +60,103 @@
     ]
   },
 
+  "slopstrocity_rolling_blunder_attack_intro": {
+    "subtitle": "subtitles.slopstrocity_rolling_blunder_attack_intro",
+    "sounds": [
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/rolling_blunder/rolling_blunder_intro",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+
+  "slopstrocity_rolling_blunder_attack_loop": {
+    "subtitle": "subtitles.slopstrocity_rolling_blunder_attack_loop",
+    "sounds": [
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/rolling_blunder/rolling_blunder_loop",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+
+  "slopstrocity_rolling_blunder_attack_hit": {
+    "subtitle": "subtitles.slopstrocity_rolling_blunder_attack_hit",
+    "sounds": [
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/rolling_blunder/rolling_blunder_hit",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "slopstrocity_rolling_blunder_pinwheel_hit": {
+    "subtitle": "subtitles.slopstrocity_rolling_blunder_pinwheel_hit",
+    "sounds": [
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/rolling_blunder/rolling_blunder_pinwheel",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+
+  "slopstrocity_rolling_blunder_attack_outro": {
+    "subtitle": "subtitles.slopstrocity_rolling_blunder_attack_outro",
+    "sounds": [
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/rolling_blunder/rolling_blunder_outro",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "slopstrocity_rolling_blunder_attack_outro_hit": {
+    "subtitle": "subtitles.slopstrocity_rolling_blunder_attack_outro_hit",
+    "sounds": [
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/rolling_blunder/rolling_blunder_outro_hit",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "slopstrocity_rolling_blunder_attack_outro_near_miss": {
+    "subtitle": "subtitles.slopstrocity_rolling_blunder_attack_outro_near_miss",
+    "sounds": [
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/rolling_blunder/rolling_blunder_outro_near_miss",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+
+  "slopstrocity_rolling_blunder_attack_end": {
+    "subtitle": "subtitles.slopstrocity_rolling_blunder_attack_end",
+    "sounds": [
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/rolling_blunder/rolling_blunder_end",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+
+  "slopstrocity_topsy_turvy": {
+    "subtitle": "subtitles.slopstrocity_topsy_turvy",
+    "sounds": [
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/rolling_blunder/topsy_turvy",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+
+  "slopstrocity_bearings_caught": {
+    "subtitle": "subtitles.slopstrocity_bearings_caught",
+    "sounds": [
+      {
+        "name": "slopstrocity:boss/slopstrocity/attack/rolling_blunder/rolling_blunder_intro",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+
   "slopstrocity_step": {
     "subtitle": "subtitles.slopstrocity_step",
     "sounds": [

@@ -25,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 public abstract class AnimatableMonster extends Monster implements WrappedAnimatable, WrappedMonster {
-    private static final EntityDataAccessor<Byte> ATTACK_ID = SynchedEntityData.defineId(AnimatableMonster.class, EntityDataSerializers.BYTE);
-    private static final EntityDataAccessor<Float> ATTACK_TICK = SynchedEntityData.defineId(AnimatableMonster.class, EntityDataSerializers.FLOAT); // Mainly used for client-side updates based on tracked server data. Actual attack behaviour is handled within goals.
+    protected static final EntityDataAccessor<Byte> ATTACK_ID = SynchedEntityData.defineId(AnimatableMonster.class, EntityDataSerializers.BYTE);
+    protected static final EntityDataAccessor<Float> ATTACK_TICK = SynchedEntityData.defineId(AnimatableMonster.class, EntityDataSerializers.FLOAT); // Mainly used for client-side updates based on tracked server data. Actual attack behaviour is handled within goals.
     private final Object2ObjectOpenHashMap<String, IntObjectImmutablePair<AnimationState>> cachedAnimationStates = new Object2ObjectOpenHashMap<>();
     public static final byte NO_ATTACK_ID = 0;
     protected int customDeathTime = 0;

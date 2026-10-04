@@ -13,10 +13,19 @@
   "subtitles.slopstrocity_idle_8": "Slopstrocity plays a ringtone",
   "subtitles.slopstrocity_idle_9": "Slopstrocity sings",
   "subtitles.slopstrocity_idle_10": "Slopstrocity yells",
-  "subtitles.slopstrocity_step": "Slopstrocity steps",
+  "subtitles.slopstrocity_step": "Slopstrocity boings",
   "subtitles.slopstrocity_hurt": "Slopstrocity hurts",
   "subtitles.slopstrocity_splooge": "Slopstrocity splooges all over the place (dies, it died)",
   "subtitles.slopstrocity_slop_slam_attack": "Slopstrocity slams",
   "subtitles.slopstrocity_slop_spit_attack": "Slopstrocity spits",
-  "subtitles.slopstrocity_slop_stomp_attack": "Slopstrocity stomps"
+  "subtitles.slopstrocity_slop_stomp_attack": "Slopstrocity stomps",
+  "subtitles.slopstrocity_rolling_blunder_attack_intro": "DING DING DING! Get ready for the Slopstrocity's ROLLING BLUNDER!",
+  "subtitles.slopstrocity_rolling_blunder_attack_loop": "Slopstrocity rolling all over his blunders",
+  "subtitles.slopstrocity_rolling_blunder_attack_hit": "Slopstrocity scores a hit",
+  "subtitles.slopstrocity_rolling_blunder_attack_outro": "Impending slopcore encore",
+  "subtitles.slopstrocity_rolling_blunder_attack_outro_hit": "SLOPCORE!!!",
+  "subtitles.slopstrocity_rolling_blunder_attack_outro_near_miss": "HE ALMOST HAD 'EM!!! (Slopstrocity misses rolling blunder)",
+  "subtitles.slopstrocity_rolling_blunder_attack_end": "Slopstrocity unrolls",
+  "subtitles.slopstrocity_topsy_turvy": "Slopstrocity seein' stars rn",
+  "subtitles.slopstrocity_bearings_caught": "Slopstrocity catches his bearings"
 }

@@ -3,6 +3,7 @@ package dev.ploats.slopstrocity.content.entity.projectile;
 import dev.ploats.slopstrocity.content.entity.base.AnimatableHurtingProjectile;
 import dev.ploats.slopstrocity.content.entity.misc.SlopstrocityGoop;
 import dev.ploats.slopstrocity.content.registry.SlopstrocityEntityTypes;
+import net.minecraft.core.Direction;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
@@ -47,13 +48,15 @@ public class SlopstrocitySpit extends AnimatableHurtingProjectile {
             setNoGravity(true);
             playAnimation(SPLAT_ANIM, true);
 
-            SlopstrocityGoop goop = SlopstrocityEntityTypes.SLOPSTROCITY_GOOP.get().create(level());
+            if (result.getDirection() == Direction.UP) {
+                SlopstrocityGoop goop = SlopstrocityEntityTypes.SLOPSTROCITY_GOOP.get().create(level());
 
-            if (goop != null) { // Somhow (JIC)
-                goop.setLifetime(random.nextInt(150, 500));
-                goop.setPos(position().x, Math.floor(position().y), position().z);
+                if (goop != null) { // Somhow (JIC)
+                    goop.setLifetime(random.nextInt(150, 500));
+                    goop.setPos(position().x, Math.floor(position().y), position().z);
 
-                level().addFreshEntity(goop);
+                    level().addFreshEntity(goop);
+                }
             }
         }
     }
